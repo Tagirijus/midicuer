@@ -13,19 +13,19 @@ This tool is the approach to generate a midi file (*.mid), which contains the pe
 --------------
 The film composer gets a movie scene. This scene has important things happening at an exact timecode. For example the screen is black and at timecode 00:10:000 (format is MM:SS:d) the first picture appears and the music has to start here. At 00:13:276 maybe an explosion happens and the music has to increase its tempo and get very action like. At 00:30:754 everything gets calm again and the music has to slow down as well.
 
-With these so called cue points the composer has to find the best tempo and compose the music so that it fits to the scene, of course. Unfortunately music is build up in beats and bars which have different lengths depending on the tempo. Some music softare sequencers have already tools which let the composer chose on which timecode which bar will be. Unluckily not all sequencers. This is where this tools comes in.
+With these so called cue points the composer has to find the best tempo and compose the music so that it fits to the scene, of course. Unfortunately music is build up in beats and bars which have different lengths depending on the tempo. Some music software sequencers have already tools which let the composer chose on which timecode which bar will be. Unluckily not all sequencers. This is where this tools comes in.
 
 
 
 2. The idea
 -----------
-The idea is that the user gives the program all mandatory cue points (the timecode points) as an input. Then he can chose on which cuepoint whether the bar shall be calculated according to the given tempo or the tempo, which is needed to reach the bar, the user chose. After that the program exports a midifile (*.mid) which contains the cuepoints as a single note and the overall tempochanges as a tempo automation. Ever host should be able to import this midi file or just the tempo automation if wished.
+The idea is that the user gives the program all mandatory cue points (the timecode points) as an input. Then he can chose on which cuepoint whether the bar shall be calculated according to the given tempo or the tempo, which is needed to reach the bar, the user chose. After that the program exports a midifile (*.mid) which contains the cuepoints as a single note and the overall tempochanges as a tempo automation. Every host should be able to import this midi file or just the tempo automation if wished.
 
 
 
 3. The usage
 ------------
-According to the upper example the usage of the program could be like this:
+According to the upper example the usage of the program could be like this (by the way: typing 'h' or 'help' shows possible commands):
 
 First we have to add the very first cuepoint at 00:00:000:
 
@@ -35,7 +35,7 @@ First we have to add the very first cuepoint at 00:00:000:
 
 	>
 
-In this example we added a cuepoint at 00:00:000 by just typing in M:S. After that we chose the name 'Start' for this first cuepoint and we used the default tempo by not entereing a tempo. The default values are always shown in the [] brackets.
+In this example we added a cuepoint at 00:00:000 by just typing in 0 minutes and 0 seconds in the format "M:S". After that we chose the name 'Start' for this first cuepoint and we used the default tempo by not entereing a tempo. The default values are always shown in the [] brackets.
 
 Now to the real first cuepoint:
 
@@ -79,7 +79,7 @@ Now we can show the first result in a table, by entering 'show' or 's':
 
 The program calculates the bars and beats for every cuepoint according to the given tempo at this point. The number in the brackets is the absolut beat, the format before that is an approach to calculate this absolute-beat to a readable bar-beat format according to the given time signature (you can change time signature and other stuff by entering 'o' or 'options').
 
-We can now change a better tempo for the beginning. The scene will contain action so a faster tempo would be nice. we can easily change the tempo for one cue (for more cues at once will be implemented later) the following way:
+We can now change a better tempo for the beginning. The scene will contain action so a faster tempo would be nice. We can easily change the tempo for one cue (for more cues at once will be implemented later) the following way:
 
 	> 0:0
 	Start delete [no] >
@@ -95,7 +95,7 @@ We can now change a better tempo for the beginning. The scene will contain actio
 	First scene > calculate [bar] >
 	First scene > tempo [160] > 160
 
-Chosing 0:10, no deletion. Then we could change the time for this actual cuepoint (maybe the client sent a new cut to the composer? this is where this program can get very handy, since the composition may just need a new tempo-automation, while the composition can stay the same or similar!). We'll use the same time for now, the same name and the same calculation mode. Only the tempo will be changed to 160 now. Lt's do it for the other cuepoints as well and look at the new table:
+Chosing 0:10, no deletion. Then we could change the time for this actual cuepoint (maybe the client sent a new cut to the composer? this is where this program can get very handy, since the composition may just need a new tempo-automation, while the composition can stay the same or similar!). We'll use the same time for now, the same name and the same calculation mode. Only the tempo will be changed to 160 now. Let's do it for the other cuepoints as well and look at the new table:
 
 	> s
 
@@ -130,7 +130,7 @@ We chose the cuepoint, do not delete it, use the same timecode, same name, but t
 	00:13:276          Explosion      160  10-2.1875 (37.1875)  bar
 	00:30:754          Calm down      160  21-4.75 (83.75)      bar
 
-It did. The tempo was just increased to 177 bpm, but that shall be no real problem for now - it's still fast an should fit to an action scene. We can see that the next cuepoint would be at bar 10 and beat 2.1875 - what a strange beat. Let's try to fix this:
+It did. The tempo was just increased to 177 bpm, but that should be no real problem for now - it's still fast and should fit to an action scene. We can see that the next cuepoint would be at bar 10 and beat 2.1875 - what a strange beat. Let's try to fix this:
 
 	> 0:13:276
 	Explosion delete [no] >

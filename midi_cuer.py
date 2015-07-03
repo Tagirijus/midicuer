@@ -227,19 +227,21 @@ class Cues_Class(object):
 		for cx, x in enumerate(self.entries):
 			if ms == x[0]:
 				idx = cx
-		if idx == -1:
-			return False
+		# return empty list if nothing found
+		if idx < 0:
+			return []
+		# else singleton list with index inside
 		else:
-			return idx if idx > 0 else True
+			return [idx]
 
 	def EditOrAdd(self, time):
 		# getting default name and ask for delete
 		if self.TimeExists(time) and time != 0:
-			the_name = self.entries[ self.TimeExists(time) ][1]
+			the_name = self.entries[ self.TimeExists(time)[0] ][1]
 			delme = raw_input(the_name + ' delete [no] > ')
 			if delme:
 				if delme == 'y' or delme == 'yes':
-					self.entries.pop( self.TimeExists(time) )
+					self.entries.pop( self.TimeExists(time)[0] )
 					return
 		elif self.TimeExists(time) and time == 0:
 			the_name = self.entries[0][1]
@@ -252,7 +254,10 @@ class Cues_Class(object):
 			the_name = ''
 
 		# editing time if it exists
-		actual = self.TimeExists(time)
+		if self.TimeExists(time):
+			actual = self.TimeExists(time)[0]
+		else:
+			actual = False
 		if actual and time != 0:
 			new_time_bool = False
 			while not new_time_bool:
@@ -306,7 +311,7 @@ class Cues_Class(object):
 			elif self.TimeExists(time) and time == 0:
 				self.entries[0][1] = cuepoint
 			else:
-				self.entries[ self.TimeExists(time) ][1] = cuepoint
+				self.entries[ self.TimeExists(time)[0] ][1] = cuepoint
 
 			# only name and BPM for the first entry
 			if time == 0:

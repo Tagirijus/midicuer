@@ -157,3 +157,5 @@ Now the Explosion-cuepoint would be in bar 10 on beat 3 exactly - unluckily the 
 4. Notes
 --------
 This program is still "work in progress". The midi export function is not that accurate yet and I assume that some internal calculation may not be that correct at the moment. Furthermore the handling of adding cuepoints and maybe even abrupt tempochanges is difficult. The main goal of this readme text is mostly to show the idea of the program. Every help improving this program is appreciated!
+
+Oh and you just need the pygame module for the built-in metronome. The main program should work without the module and without the metronome function.

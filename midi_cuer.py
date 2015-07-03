@@ -7,7 +7,7 @@ path_to_project = os.path.dirname(os.path.realpath(__file__))
 
 
 # functions
-		
+
 
 # midi file
 
@@ -132,18 +132,18 @@ class Cues_Class(object):
 				self.beat_length = int(data[0].split(',')[1])
 				self.stepsize = float(data[0].split(',')[2])
 			except Exception, e:
-				print 'File is not compatible, sorry. Loaded maybe corrupt.'
+				print 'Error loading file. Content maybe corrupt.'
 			for x in data[1:]:
 				tmp = []
 				try:
 					tmp.append( int(x.split(',')[0]) ) 		# time
 					tmp.append( x.split(',')[1] )			# name
-					tmp.append( int(x.split(',')[2]) )	# tempo
+					tmp.append( int(x.split(',')[2]) )		# tempo
 					tmp.append( float(x.split(',')[3]) )	# bar
 					tmp.append( x.split(',')[4] )			# calculate
 					ret.append( tmp )
 				except Exception, e:
-					print 'File is not compatible, sorry. Loaded maybe corrupt.'
+					print 'Error loading file. Content maybe corrupt.'
 			self.entries = ret
 			self.update()
 			print 'Loaded', filename
@@ -152,29 +152,29 @@ class Cues_Class(object):
 		# entries must contain stuff
 		if len(self.entries) == 0:
 			return
-		
+
 		# reset the midi variable
 		global Midi
 		Midi = MIDIFile(1)
 		Midi.addTrackName(track, time_start, 'MIDI Cuer')
-		
+
 		# the great export loop
 		all_beats = int( math.ceil( self.entries[len(self.entries)-1][3] ) )
 		out = {}
 		for x in xrange(1, len(self.entries)):
 			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], self.stepsize ) )
-		
+
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
 			if self.BeatExists(x):
 				AddNote(x)
-		
+
 		print 'Debuggin:'
 		for x in sorted(out):
 			print x, out[x]
 
 		SaveIt(filename)
-	
+
 	def save(self, filename):
 		content = str(self.beats_per_bar) + ',' + str(self.beat_length) + ',' + str(self.stepsize) + '\n'
 		for x in self.entries:
@@ -187,7 +187,7 @@ class Cues_Class(object):
 	def update(self):
 		self.entries.sort(key=lambda x: x[0])
 		for x in xrange(1,len(self.entries)):
-			
+
 			# calculate bar
 			if self.entries[x][4] == 'bar':
 				self.entries[x][3] = self.calcBar(x)
@@ -231,7 +231,7 @@ class Cues_Class(object):
 			return False
 		else:
 			return idx if idx > 0 else True
-	
+
 	def EditOrAdd(self, time):
 		# getting default name and ask for delete
 		if self.TimeExists(time) and time != 0:
@@ -250,7 +250,7 @@ class Cues_Class(object):
 					return
 		else:
 			the_name = ''
-		
+
 		# editing time if it exists
 		actual = self.TimeExists(time)
 		if actual and time != 0:
@@ -298,7 +298,7 @@ class Cues_Class(object):
 			cuepoint = raw_input(retTime(time) + ' name [' + the_name +  '] > ')
 			if not cuepoint:
 				cuepoint = the_name
-			
+
 			# add default entry: time, name, tempo, bar, calculate
 			if not self.TimeExists(time):
 				self.entries.append([time, cuepoint, tempo_default, 0.0, 'bar'])
@@ -330,10 +330,10 @@ class Cues_Class(object):
 			if calc:
 				if calc == 'bpm' or calc == 'bar':
 					self.entries[actual][4] = calc
-			
-			
+
+
 			# chose what shall be entered and what calculated
-			
+
 			#
 			# calculate the bar
 			#
@@ -383,7 +383,7 @@ class Cues_Class(object):
 		if user == '1':
 			userr = raw_input('options > Time signature > Beats [' + str(self.beats_per_bar) + '] > ')
 			if userr:
-				try:	
+				try:
 					userr = int(userr)
 					if userr > 0:
 						self.beats_per_bar = userr
@@ -452,7 +452,7 @@ class Cues_Class(object):
 					self.entries[entry][2] -= 1
 					this_bar = self.calcBar(entry)
 				return self.entries[entry][2]
-			
+
 			# make bpm faster
 			elif this_bar < do_bar:
 				while this_bar < do_bar:
@@ -468,7 +468,7 @@ class Cues_Class(object):
 				return self.entries[0][2]
 			else:
 				return tempo_default
-	
+
 	def calcBar(self, entry):
 		if entry > 0 and entry < len(self.entries):
 			pos_ms = self.entries[entry-1][0]

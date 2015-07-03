@@ -117,7 +117,7 @@ class Cues_Class(object):
 		self.entries = []
 		self.beats_per_bar = 4
 		self.beat_length = 4
-		self.stepsize = 0.125
+		self.stepsize = 0.0625
 
 	def load(self, filename):
 		ret = []
@@ -166,7 +166,13 @@ class Cues_Class(object):
 		
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
+			if self.BeatExists(x):
+				AddNote(x)
 		
+		print 'Debuggin:'
+		for x in sorted(out):
+			print x, out[x]
+
 		SaveIt(filename)
 	
 	def save(self, filename):
@@ -206,6 +212,16 @@ class Cues_Class(object):
 		head = ['Time [MM:SS:MS]', 'Cuepoint', 'BPM', 'Bar-Beat', 'Calc']
 		print tabulate(out, head)
 
+	def BeatExists(self, beat):
+		idx = -1
+		for cx, x in enumerate(self.entries):
+			if beat == x[3]:
+				idx = cx
+		if idx == -1:
+			return False
+		else:
+			return idx if idx > 0 else True
+
 	def TimeExists(self, ms):
 		idx = -1
 		for cx, x in enumerate(self.entries):
@@ -235,6 +251,48 @@ class Cues_Class(object):
 		else:
 			the_name = ''
 		
+		# editing time if it exists
+		actual = self.TimeExists(time)
+		if actual and time != 0:
+			new_time_bool = False
+			while not new_time_bool:
+				new_time = raw_input('Time [' + retTime( self.entries[ actual ][0] ) + '] > ')
+				try:
+					if new_time:
+						new_time = retMs(new_time)
+						rel_time = raw_input('Changing following entries relatively [yes] ? ')
+						if rel_time == 'n' or rel_time == 'no':
+							# changing just the time for the acutal entry; must be between previous and following
+							if len(self.entries) > actual:
+								if new_time > self.entries[ actual-1 ][0] and new_time < self.entries[ actual+1 ][0]:
+									self.entries[ actual ][0] = new_time
+									self.update()
+									time = new_time
+									new_time_bool = True
+								else:
+									print 'Time has to be between previous and following entry.'
+							elif len(self.entries) == actual:
+								if new_time > self.entries[ actual-1 ][0]:
+									self.entries[ actual ][0] = new_time
+									self.update()
+									time = new_time
+									new_time_bool = True
+								else:
+									print 'Time has to be over the previous time.'
+						else:
+							# changing the time relatively for all following entries
+							if len(self.entries) >= actual:
+								diff = new_time - self.entries[actual][0]
+								for x in xrange(actual,len(self.entries)):
+									self.entries[x][0] += diff
+								self.update()
+								time = new_time
+								new_time_bool = True
+					else:
+						new_time_bool = True
+				except Exception, e:
+					print 'No valid time format.'
+
 		# editing or adding entry
 		if self.TimeExists(0) or time == 0:
 			cuepoint = raw_input(retTime(time) + ' name [' + the_name +  '] > ')
@@ -249,7 +307,6 @@ class Cues_Class(object):
 				self.entries[0][1] = cuepoint
 			else:
 				self.entries[ self.TimeExists(time) ][1] = cuepoint
-			actual = self.TimeExists(time)
 
 			# only name and BPM for the first entry
 			if time == 0:
@@ -341,7 +398,7 @@ class Cues_Class(object):
 				except Exception, e:
 					print 'Note value invalid or unchanged.'
 		elif user == '2':
-			print '\nStepsize is the duration for one tempo event, while 1 is equal to a quarter note and the default is a 32th note = 0.125.'
+			print '\nStepsize is the duration for one tempo event, while 1 is equal to a quarter note.'
 			userr = raw_input('options > Stepsize [' + str(self.stepsize) + '] > ')
 			if userr:
 				try:
@@ -377,6 +434,7 @@ class Cues_Class(object):
 
 	def calcBpm(self, entry):
 		if entry > 0 and entry < len(self.entries):
+			this_tempo = self.entries[entry][2]
 			self.entries[entry][2] = self.entries[entry-1][2]
 			do_bar = self.entries[entry][3]
 			this_bar = self.calcBar(entry)
@@ -404,7 +462,7 @@ class Cues_Class(object):
 
 			# bpm already fits
 			else:
-				return this_bar
+				return this_tempo
 		else:
 			if len(self.entries) > 0:
 				return self.entries[0][2]
@@ -425,10 +483,10 @@ class Cues_Class(object):
 			return 0.0
 
 	def calcIterBpm(self, start_ms, end_ms, start_bpm, end_bpm):
-		if start_bpm < end_bpm:
-			end_bpm += 1
-		else:
+		if start_bpm > end_bpm:
 			end_bpm -= 1
+		else:
+			end_bpm += 1
 		dif_ms = abs( start_ms - end_ms )
 		dif_bt = abs( start_bpm - end_bpm )
 		if dif_bt == 0:

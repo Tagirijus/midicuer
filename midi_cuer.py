@@ -193,16 +193,17 @@ class Cues_Class(object):
 		all_beats = int( math.ceil( self.entries[len(self.entries)-1][3] ) )
 		out = {}
 		for x in xrange(1, len(self.entries)):
-			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], self.stepsize ) )
+			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], (self.stepsize/10) ) )
 
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
 			if self.BeatExists(x):
 				AddNote(x)
 
-		print 'Debuggin:'
-		for x in sorted(out):
-			print x, out[x]
+		# de-comment following 3 lines for debugging during output
+		# print 'Debuggin:'
+		# for x in sorted(out):
+		# 	print x, out[x]
 
 		SaveIt(filename)
 
@@ -345,6 +346,7 @@ class Cues_Class(object):
 			if not self.TimeExists(time):
 				self.entries.append([time, cuepoint, tempo_default, 0.0, 'bar'])
 				self.update()
+				actual = self.TimeExists(time)[0]
 			elif self.TimeExists(time) and time == 0:
 				self.entries[0][1] = cuepoint
 			else:

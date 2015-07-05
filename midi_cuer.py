@@ -3,6 +3,7 @@ from time import sleep
 from midiutil.MidiFile import MIDIFile
 from tabulate import tabulate
 
+# get the actual path to the python script - for relative loading of the metronome sounds
 path_to_project = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -12,29 +13,35 @@ path_to_project = os.path.dirname(os.path.realpath(__file__))
 # midi file
 
 def SaveIt(out_file):
+	'Saves the midi data into the [out_file]'
 	out = open(out_file, 'wb')
 	Midi.writeFile(out)
 	out.close()
 
 def AddTempo(bar, tempo):
+	'Adds a new tempo event with the given [tempo] at the given [bar]'
 	Midi.addTempo(track, bar, tempo)
 
 def AddNote(bar):
+	'Adds a predefined note at the given [bar]'
 	Midi.addNote(track, 1, 60, bar, 1, 100)
 
 
 # sound generation
 
 def BpmToSec(bpm):
+	'Returns secons which will pass for one beat with the given [bpm]'
 	return 60.0 / bpm
 
 def Beep(which=1):
+	'Makes a single beep. [which=1] is default and beeps high, [which!=1] beeps low'
 	if which == 1:
 		hi.play(maxtime=0)
 	else:
 		lo.play(maxtime=0)
 
 def Metronome(bpm=120, bars=2, beats=4, length=4):
+	'Starts a metronome with the tempo [bpm] for the length of N [bars] and the time signature of [beats] / [length]'
 	boing = True
 	b = 1
 	bar = 0
@@ -56,6 +63,7 @@ def Metronome(bpm=120, bars=2, beats=4, length=4):
 # other stuff
 
 def drange(start, stop, step=1):
+	'Iter generator like xrange or range, but with the ability to use decimal numbers for the [step]'
 		if '.' in str(step):
 			decimals = len(str(step).split('.')[1])
 		else:
@@ -68,6 +76,7 @@ def drange(start, stop, step=1):
 		return out
 
 def retMs(time):
+	'Converts a string with the format [MM:SS] or [MM:SS:d] to an integer for milliseconds'
 	if time.count(':') == 1:
 		parts = time.split(':')
 		try:
@@ -89,6 +98,7 @@ def retMs(time):
 	return MS + (SS*1000) + (MM*60000)
 
 def retTime(ms):
+	'Converts an integer which contains milliseconds to a readable time string with the format [MM:SS:d]'
 	MM = ms / 60000
 	SS = (ms % 60000) / 1000
 	MS = (ms % 60000) % 1000
@@ -120,6 +130,7 @@ class Cues_Class(object):
 		self.stepsize = 0.0625
 
 	def load(self, filename):
+		'Loads a project file'
 		ret = []
 		if os.path.isfile(filename):
 			out = open(filename, 'r')
@@ -149,6 +160,7 @@ class Cues_Class(object):
 			print 'Loaded', filename
 
 	def export(self, filename):
+		'Exports the project to a MIDI-file'
 		# entries must contain stuff
 		if len(self.entries) == 0:
 			return
@@ -176,6 +188,7 @@ class Cues_Class(object):
 		SaveIt(filename)
 
 	def save(self, filename):
+		'Saves the project to [filename]'
 		content = str(self.beats_per_bar) + ',' + str(self.beat_length) + ',' + str(self.stepsize) + '\n'
 		for x in self.entries:
 			content += ','.join(str(y) for y in x) + '\n'
@@ -185,6 +198,7 @@ class Cues_Class(object):
 		print 'Saved to', filename
 
 	def update(self):
+		'Sorts and updates the self.entries variable'
 		self.entries.sort(key=lambda x: x[0])
 		for x in xrange(1,len(self.entries)):
 
@@ -197,6 +211,7 @@ class Cues_Class(object):
 				self.entries[x][2] = self.calcBpm(x)
 
 	def show(self):
+		'Prints out all cuepoints in a readable table'
 		print
 		print 'Time signature: ' + str(self.beats_per_bar) + '/' + str(self.beat_length)
 		print
@@ -213,6 +228,7 @@ class Cues_Class(object):
 		print tabulate(out, head)
 
 	def BeatExists(self, beat):
+		'Returns true if [beat] exists in the self.entries variable'
 		idx = -1
 		for cx, x in enumerate(self.entries):
 			if beat == x[3]:
@@ -223,6 +239,7 @@ class Cues_Class(object):
 			return idx if idx > 0 else True
 
 	def TimeExists(self, ms):
+		'Returns true if [ms] exists in the self.entries variable'
 		idx = -1
 		for cx, x in enumerate(self.entries):
 			if ms == x[0]:
@@ -235,6 +252,7 @@ class Cues_Class(object):
 			return [idx]
 
 	def EditOrAdd(self, time):
+		'Adds a new entry or edits an existing one - or lets the user delete the selected entry'
 		# getting default name and ask for delete
 		if self.TimeExists(time) and time != 0:
 			the_name = self.entries[ self.TimeExists(time)[0] ][1]
@@ -379,6 +397,7 @@ class Cues_Class(object):
 			print 'Add cuepoint at 00:00:000 first, please.'
 
 	def options(self):
+		'Enters the settings / options menu'
 		print
 		print '(1) Time signatur'
 		print '(2) Stepsize'
@@ -427,6 +446,7 @@ class Cues_Class(object):
 					pass
 
 	def calcBeatToMs(self, bpm, beat=False):
+		'Calculates how much milliseconds are [beat]s with the actual [bpm]'
 		if not beat:
 			beat = self.stepsize
 		if bpm > 0:
@@ -438,6 +458,7 @@ class Cues_Class(object):
 		return factor*beat
 
 	def calcBpm(self, entry):
+		'Iterates through all possible bpms for self.entries[ [entry] ] and tries to find best bpm so that the given beat at the gien timecode fits'
 		if entry > 0 and entry < len(self.entries):
 			this_tempo = self.entries[entry][2]
 			self.entries[entry][2] = self.entries[entry-1][2]
@@ -475,6 +496,7 @@ class Cues_Class(object):
 				return tempo_default
 
 	def calcBar(self, entry):
+		'Simply calculates the bar for self.entries[ [entry] ] according to previous entries, positions and bpms'
 		if entry > 0 and entry < len(self.entries):
 			pos_ms = self.entries[entry-1][0]
 			pos_bt = self.entries[entry-1][3]
@@ -488,6 +510,7 @@ class Cues_Class(object):
 			return 0.0
 
 	def calcIterBpm(self, start_ms, end_ms, start_bpm, end_bpm):
+		'Returns a dict with an uniformly distributed list over another. List2 which goes from [start_bpm] to [end_bpm] is distributed over List1 which goes from [start_ms] to [end_ms]. Result will be accessed like  out[list1_position] = list2_position'
 		if start_bpm > end_bpm:
 			end_bpm -= 1
 		else:
@@ -514,6 +537,7 @@ class Cues_Class(object):
 		return out
 
 	def calcIterBeats(self, start_beat, end_beat, start_bpm, end_bpm, stepsize):
+		'Returns a dict with an uniformly distributed list over another. List2 which goes from [start_bpm] to [end_bpm] is distributed over List1 which goes from [start_beat] to [end_beat]. Result will be accessed like  out[list1_position] = list2_position'
 		if start_bpm < end_bpm:
 			end_bpm += 1
 		else:
@@ -541,6 +565,7 @@ class Cues_Class(object):
 		return out
 
 	def BarToReadableBar(self, bar):
+		'Converts the absolute midi bar position (e.g. 3.0) to a readable string with the format bar-beat like 1-3.0'
 		single_beat = 4.0 / self.beat_length
 		beats_in_bar = single_beat * self.beats_per_bar
 		actual_bar  = int( ( bar - ( bar % beats_in_bar) ) / beats_in_bar ) + 1
@@ -555,29 +580,33 @@ class Cues_Class(object):
 
 # start program
 
+# declare standard midi variables
 track = 0
 time_start = 0
 tempo_default = 120
 
 
-# init stuff
+# init pygame mixer stuff - used for the metronome only
 pygame.mixer.pre_init(44100,-16,2, 1024)
 pygame.mixer.init()
 hi = pygame.mixer.Sound(path_to_project + '/metronome/high.wav')
 lo = pygame.mixer.Sound(path_to_project + '/metronome/low.wav')
 
+
+# generate the Cues variable
 Cues = Cues_Class()
 
 
-# do stuff
+# real program starts here
 print
 print 'MIDI Cuer program'
 
 run = True
 while run:
+	# first input from user aquired
 	user = raw_input('\n> ')
 
-	# debug
+	# deb: used for developing purpose only - no feature for the actual user in the end
 	if user[0:3] == 'deb':
 		try:
 			args = user.split(' ')

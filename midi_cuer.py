@@ -1,6 +1,6 @@
 # Program for generating best midi tempo automation with given cuepoints
 #
-# Author: Manuel Senfft (www.tagirijus.de)
+# Author: Manuel Senfft (www.tagirijus.de/en)
 # github: https://github.com/Tagirijus/midicuer
 #
 #
@@ -12,7 +12,7 @@
 # bpm which is calculated with Cue_Class.iterBpm() from previous to actual cuepoint. It also calculates the actual
 # bar for every testing step with Cue_Class.calcBar() and stops, if the bar is correct (the user input bar).
 #
-# I have to confess that it's hard to describe and that really may not be the best solution yet, since it's more
+# I have to confess that it's hard to describe and this really may not be the best solution now, since it's mostly
 # like trial and error. Maybe I (or other people) will find a better solution and support this project!
 
 

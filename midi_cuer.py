@@ -1,3 +1,22 @@
+# Program for generating best midi tempo automation with given cuepoints
+#
+# Author: Manuel Senfft (www.tagirijus.de)
+# github: https://github.com/Tagirijus/midicuer
+#
+#
+# Mainly this programm gets input from the user and calculates either the bar with the given bpm
+# or the most perfect bpm with the given beat - according to previous cuepoint-entries.
+#
+# One of the core functions is the Cue_Class.calcBpm() function. It iters through most possibilities from the
+# previous cuepoint, calculates length in milliseconds for every step (Cue_Class.stepsize) according to the actual
+# bpm which is calculated with Cue_Class.iterBpm() from previous to actual cuepoint. It also calculates the actual
+# bar for every testing step with Cue_Class.calcBar() and stops, if the bar is correct (the user input bar).
+#
+# I have to confess that it's hard to describe and that really may not be the best solution yet, since it's more
+# like trial and error. Maybe I (or other people) will find a better solution and support this project!
+
+
+
 import pygame, cmd, os, math
 from time import sleep
 from midiutil.MidiFile import MIDIFile
@@ -30,7 +49,7 @@ def AddNote(bar):
 # sound generation
 
 def BpmToSec(bpm):
-	'Returns secons which will pass for one beat with the given [bpm]'
+	'Returns seconds which will pass for one beat with the given [bpm]'
 	return 60.0 / bpm
 
 def Beep(which=1):

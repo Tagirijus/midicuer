@@ -83,16 +83,16 @@ def Metronome(bpm=120, bars=2, beats=4, length=4):
 
 def drange(start, stop, step=1):
 	'Iter generator like xrange or range, but with the ability to use decimal numbers for the [step]'
-		if '.' in str(step):
-			decimals = len(str(step).split('.')[1])
-		else:
-			decimals = 1
-		r = start
-		out = []
-		while r < stop:
-			out.append( round(r, decimals) )
-			r += step
-		return out
+	if '.' in str(step):
+		decimals = len(str(step).split('.')[1])
+	else:
+		decimals = 1
+	r = start
+	out = []
+	while r < stop:
+		out.append( round(r, decimals) )
+		r += step
+	return out
 
 def retMs(time):
 	'Converts a string with the format [MM:SS] or [MM:SS:d] to an integer for milliseconds'

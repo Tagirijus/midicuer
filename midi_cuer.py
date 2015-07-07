@@ -193,7 +193,7 @@ class Cues_Class(object):
 		all_beats = int( math.ceil( self.entries[len(self.entries)-1][3] ) )
 		out = {}
 		for x in xrange(1, len(self.entries)):
-			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], (self.stepsize/10) ) )
+			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], (self.stepsize/2) ) )
 
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
@@ -253,10 +253,12 @@ class Cues_Class(object):
 		for cx, x in enumerate(self.entries):
 			if beat == x[3]:
 				idx = cx
-		if idx == -1:
-			return False
+		# return empty list if nothing found
+		if idx < 0:
+			return []
+		# else singleton list with index inside
 		else:
-			return idx if idx > 0 else True
+			return [idx]
 
 	def TimeExists(self, ms):
 		'Returns true if [ms] exists in the self.entries variable'
@@ -563,7 +565,7 @@ class Cues_Class(object):
 			end_bpm += 1
 		else:
 			end_bpm -= 1
-		iterme = drange(start_beat,end_beat+stepsize,stepsize)
+		iterme = drange(start_beat,end_beat+stepsize,(stepsize/2))
 		dif_beat = len( iterme )
 		dif_bt = abs( start_bpm - end_bpm )
 		if dif_bt == 0:
@@ -629,15 +631,7 @@ while run:
 
 	# deb: used for developing purpose only - no feature for the actual user in the end
 	if user[0:3] == 'deb':
-		try:
-			args = user.split(' ')
-			if len(args) > 2:
-				bts = float(args[2])
-			else:
-				bts = False
-			print 'Debug:', Cues.calcBeatToMs(int(args[1]), bts)
-		except Exception, e:
-			print 'Error'
+		print 'Debugging ...'
 
 	# edit / add entry
 	if ':' in user:

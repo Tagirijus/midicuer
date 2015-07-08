@@ -146,7 +146,7 @@ class Cues_Class(object):
 		self.entries = []
 		self.beats_per_bar = 4
 		self.beat_length = 4
-		self.stepsize = 0.0625
+		self.stepsize = 0.03125
 
 	def load(self, filename):
 		'Loads a project file'
@@ -193,7 +193,7 @@ class Cues_Class(object):
 		all_beats = int( math.ceil( self.entries[len(self.entries)-1][3] ) )
 		out = {}
 		for x in xrange(1, len(self.entries)):
-			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], (self.stepsize/2) ) )
+			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], self.stepsize ) )
 
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
@@ -565,7 +565,7 @@ class Cues_Class(object):
 			end_bpm += 1
 		else:
 			end_bpm -= 1
-		iterme = drange(start_beat,end_beat+stepsize,(stepsize/2))
+		iterme = drange(start_beat,end_beat+stepsize,stepsize)
 		dif_beat = len( iterme )
 		dif_bt = abs( start_bpm - end_bpm )
 		if dif_bt == 0:

@@ -89,10 +89,17 @@ def drange(start, stop, step=1):
 		decimals = 1
 	r = start
 	out = []
-	while r < stop:
-		out.append( round(r, decimals) )
-		r += step
-	return out
+
+	if stop > start:
+		while r < stop:
+			out.append( round(r, decimals) )
+			r += step
+		return out
+	elif stop < start:
+		while r > stop:
+			out.append( round(r, decimals) )
+			r -= step
+		return out
 
 def retMs(time):
 	'Converts a string with the format [MM:SS] or [MM:SS:d] to an integer for milliseconds'
@@ -194,6 +201,7 @@ class Cues_Class(object):
 		out = {}
 		for x in xrange(1, len(self.entries)):
 			out.update( self.calcIterBeats( self.entries[x-1][3], self.entries[x][3], self.entries[x-1][2], self.entries[x][2], self.stepsize ) )
+
 
 		for x in sorted(out.iterkeys()):
 			AddTempo(x, out[x])
@@ -372,7 +380,7 @@ class Cues_Class(object):
 				return
 
 			# edit entries over 0
-			calc = raw_input(cuepoint + ' > calculate [' + self.entries[actual][4] + '] > ')
+			calc = raw_input(cuepoint + ' > calculate bpm or bar [' + self.entries[actual][4] + '] > ')
 			if calc:
 				if calc == 'bpm' or calc == 'bar':
 					self.entries[actual][4] = calc

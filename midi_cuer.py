@@ -413,7 +413,7 @@ class Cues_Class(object):
 			elif self.entries[actual][4] == 'bpm':
 				bar_bool = False
 				while not bar_bool:
-					bar = raw_input(cuepoint + ' > bar [' + str(self.entries[actual][3]) + '] > ')
+					bar = raw_input(cuepoint + ' > bar [' + str(self.BarToReadableBar(self.entries[actual][3])) + '] > ')
 					try:
 						bar = float(bar)
 						if bar <= self.entries[actual-1][3]:

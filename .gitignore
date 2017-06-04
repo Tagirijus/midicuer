@@ -1,3 +1,6 @@
+/test
 /test.py
 *.mid
 *.midicuer
+*.pyc
+todo.txt

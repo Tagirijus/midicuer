@@ -4,20 +4,20 @@ MIDI Cuer tool for filmmusic composers
 Short description
 -----------------
 
-This tool is an approach to generate a midi file (*.mid), which contains the perfect tempo automation according to given cue points.
+This tool is an approach to generate a midi file (*.mid), which contains the perfect tempo automation according to given cue points for scoring film music.
 
 
-#Problem
+# Problem
 The film composer gets a movie scene. This scene has important things happening at an exact timecode. For example the screen is black and at timecode 00:10:000 (format is MM:SS:d) the first picture appears and the music has to start here. At 00:13:276 maybe an explosion happens and the music has to increase its tempo and get very action like. At 00:30:754 everything gets calm again and the music has to slow down as well.
 
 With these so called cue points the composer has to find the best tempo and compose the music such that it fits the scene. Unfortunately music is build up in beats and bars which have different lengths depending on the tempo. Some music software sequencers already have tools which let the composer chose on which timecode which bar will be.But not all sequencers. This is where this tool comes in.
 
 
-#Solution
+# Solution
 The idea is that the user gives the program all mandatory cue points (the timecode points) as an input. Then he can choose on each cuepoint whether the bar shall be computed according to the given tempo or the tempo shall be computed which is needed to reach the bar the user chose. After that the program exports a midifile (*.mid) which contains the cuepoints as a single note and the overall tempo changes as a tempo automation. Every host should be able to import this midi file or just the tempo automation if wished.
 
 
-#Usage
+# Usage
 According to the upper example the usage of the program could be like this (typing 'h' or 'help' shows possible commands):
 
 First we have to add the initial cuepoint at 00:00:000:
@@ -146,7 +146,7 @@ It did. The tempo was just increased to 177 bpm, but that should be no real prob
 Now the Explosion-cuepoint would be in bar 10 on beat 3 exactly - unluckily the tempo increased even further.
 
 
-#Notes
+# Notes
 This program is still "work in progress". The midi export function is not that accurate yet and I assume that some internal calculation may not be absolutely correct at the moment. Furthermore the handling of adding cuepoints and maybe even abrupt tempochanges is difficult. The main goal of this readme text is mostly to show the idea of the program. Every help improving this program is appreciated!
 
 Oh and you only need the pygame module for the built-in metronome. The main program should work without the module and without the metronome function.

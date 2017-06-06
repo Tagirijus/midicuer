@@ -3,6 +3,7 @@
 from general import file_handling
 from general import midicuer
 import npyscreen
+from npy_gui.npy_midicuerform import MIDICueForm
 
 
 class midicuerApplication(npyscreen.NPSAppManaged):
@@ -16,6 +17,7 @@ class midicuerApplication(npyscreen.NPSAppManaged):
         self.tmpMIDICues = []
 
         # set file
+        self.theFile = file_handling.FileObject(file=file)
 
 
     def onStart(self):
@@ -23,6 +25,6 @@ class midicuerApplication(npyscreen.NPSAppManaged):
         # create the forms
         self.addForm(
             'MAIN',
-            midicuerForm,
+            MIDICueForm,
             name='midicuer'
         )

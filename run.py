@@ -31,7 +31,8 @@ def main():
 
     args = args.parse_args()
 
-    
+    app = npy_gui.midicuerApplication()
+    app.run()
 
 
 if __name__ == '__main__':

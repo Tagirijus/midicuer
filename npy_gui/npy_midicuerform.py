@@ -84,6 +84,11 @@ class CueListBox(npyscreen.BoxTitle):
 class MIDICueForm(npyscreen.FormBaseNewWithMenus):
     """MIDICueForm."""
 
+    def project(self):
+        """Switch to project settings."""
+        self.parentApp.setNextForm('Project')
+        self.parentApp.switchFormNow()
+
     def exit(self):
         """Exit the programm."""
         self.parentApp.setNextForm(None)
@@ -93,6 +98,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         """Initialize the form with its widgets."""
         # create the menu
         self.m = self.new_menu(name='Menu')
+        self.m.addItem(text='Project', onSelect=self.project, shortcut='p')
         self.m.addItem(text='Exit', onSelect=self.exit, shortcut='e')
 
         # create the box with the project list and update the list
@@ -102,6 +108,6 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         )
 
     def beforeEditing(self):
-        """Get correct lists for clients and projects."""
+        """Get values."""
         # update cues
         self.cue_box.entry_widget.update_values()

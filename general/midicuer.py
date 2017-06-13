@@ -270,8 +270,6 @@ class MIDICueList(object):
     def __init__(
         self,
         framerate=None,
-        def_timesignature_upper=4,
-        def_timesignature_lower=4,
         resolution=64
     ):
         """Initialize the class."""
@@ -286,14 +284,6 @@ class MIDICueList(object):
         ]
 
         self.framerate = 1000 if framerate is None else framerate
-
-        """
-        upper and lower specifying the time signature. the upper value is the amount
-        of notes in a bar and the lower value is the note lengths, which should
-        be something like typical musical note lengths like: 1, 2, 4, 8, 16, 32, 64 ...
-        """
-        self.def_timesignature_upper = def_timesignature_upper
-        self.def_timesignature_lower = def_timesignature_lower
 
         """
         the resolution determines the stepsize for calculating the tempo or beat of

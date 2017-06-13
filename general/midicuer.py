@@ -8,7 +8,6 @@ Todo:
 
 from decimal import Decimal
 from timecode import Timecode as Timecode_original
-import math
 
 
 class Timecode(Timecode_original):
@@ -508,7 +507,6 @@ class MIDICueList(object):
 
         return int(round(seconds * 1000))
 
-
     def calc_beat(self, start_tempo, end_tempo, time):
         """
         Calculate the beats passed in milliseconds between tempos.
@@ -541,7 +539,6 @@ class MIDICueList(object):
         if len(self._cues) < 1:
             return False
 
-        first_skipped = False
         # iter through all cuepoints
         for i, cue in enumerate(self._cues):
 
@@ -550,13 +547,13 @@ class MIDICueList(object):
                 continue
 
             # get start tempo from cue-tempo before this cue
-            start_tempo = self._cues[i-1].tempo
+            start_tempo = self._cues[i - 1].tempo
 
             # get end tempo from actual cue-tempo, if cue before this cue
             # is not set to hold_tempo
             end_tempo = (
-                self._cues[i-1].tempo
-                if self._cues[i-1].hold_tempo
+                self._cues[i - 1].tempo
+                if self._cues[i - 1].hold_tempo
                 else cue.tempo
             )
 
@@ -564,7 +561,7 @@ class MIDICueList(object):
             beats_diff = cue.beat - self._cues[i - 1].beat
 
             # get time difference between this and the cue before
-            time_diff = cue.timecode.tc_to_ms() - self._cues[i-1].timecode.tc_to_ms()
+            time_diff = cue.timecode.tc_to_ms() - self._cues[i - 1].timecode.tc_to_ms()
 
             # check which calculation method is set
             # or set it to bar, if cue before has hold_time
@@ -575,7 +572,7 @@ class MIDICueList(object):
             if cue.calc == 'beat':
 
                 # calculate the new beat for actual cue, based on beat of cue before
-                cue.beat = self._cues[i-1].beat + Decimal(self.calc_beat(
+                cue.beat = self._cues[i - 1].beat + Decimal(self.calc_beat(
                     start_tempo=start_tempo,
                     end_tempo=end_tempo,
                     time=time_diff
@@ -595,7 +592,7 @@ class MIDICueList(object):
             elif cue.calc == 'time':
 
                 # caluclate the new time for actual cue
-                cue.timecode = self._cues[i-1].timecode.tc_to_ms() + self.calc_time(
+                cue.timecode = self._cues[i - 1].timecode.tc_to_ms() + self.calc_time(
                     beats=beats_diff,
                     start_tempo=start_tempo,
                     end_tempo=end_tempo

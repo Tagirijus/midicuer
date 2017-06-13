@@ -156,4 +156,3 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
         """Cancel and switch back."""
         self.parentApp.setNextForm('MAIN')
         self.parentApp.switchFormNow()
-

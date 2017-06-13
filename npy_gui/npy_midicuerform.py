@@ -82,6 +82,7 @@ class CueList(npyscreen.MultiLineAction):
         # yepp, deactivate it
         if really:
             self.parent.parentApp.tmpCues.pop(self.cursor_line)
+            self.update_values()
 
     def actionHighlighted(self, act_on_this, keypress=None):
         """Do something, because a key was pressed."""

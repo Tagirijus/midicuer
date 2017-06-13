@@ -279,6 +279,34 @@ class MIDICue(object):
         elif value == 'time' or value == 2:
             self._calc = 'time'
 
+    def to_dict(self):
+        """Convert object to dict."""
+        out = {}
+
+        # fetch the variables
+        out['type'] = self.__class__.__name__
+        out['first'] = self.first
+        out['title'] = self.title
+        out['comment'] = self.comment
+        out['framerate'] = self.framerate
+        out['timecode'] = self.timecode.tc_to_ms()
+        out['timesignature_upper'] = self.timesignature_upper
+        out['timesignature_lower'] = self.timesignature_lower
+        out['tempo'] = self.tempo
+        out['hold_tempo'] = self.hold_tempo
+        out['beat'] = str(self.beat)
+
+        return out
+
+    def to_json(self, indent=2, ensure_ascii=False):
+        """Convert variables data to json format."""
+        return json.dumps(
+            self.to_dict(),
+            indent=indent,
+            ensure_ascii=ensure_ascii,
+            sort_keys=True
+        )
+
 
 class MIDICueList(object):
     """The object holding some settings and a list with the MIDICues."""
@@ -597,3 +625,31 @@ class MIDICueList(object):
                     start_tempo=start_tempo,
                     end_tempo=end_tempo
                 )
+
+    def to_dict(self):
+        """Convert object to dict."""
+        out = {}
+
+        # fetch the variables
+        out['type'] = self.__class__.__name__
+        out['framerate'] = self.framerate
+        out['resolution'] = self.resolution
+
+        # fetch the jsons from the cues
+        out['cues'] = []
+        for cue in self._cues:
+            try:
+                out['cues'].append(cue.to_dict())
+            except:
+                out['cues'].append(cue)
+
+        return out
+
+    def to_json(self, indent=2, ensure_ascii=False):
+        """Convert variables data to json format."""
+        return json.dumps(
+            self.to_dict(),
+            indent=indent,
+            ensure_ascii=ensure_ascii,
+            sort_keys=True
+        )

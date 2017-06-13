@@ -7,19 +7,19 @@ from npy_gui.npy_midicuerform import MIDICueForm
 from npy_gui.npy_projectform import ProjectForm
 
 
-class midicuerApplication(npyscreen.NPSAppManaged):
+class MIDICuerApplication(npyscreen.NPSAppManaged):
     """The main application object."""
 
     def __init__(self, file=None, *args, **kwargs):
         """Initialize the class."""
-        super(midicuerApplication, self).__init__(*args, **kwargs)
+        super(MIDICuerApplication, self).__init__(*args, **kwargs)
 
         # set global temp variables
         self.tmpCues = midicuer.MIDICueList()
+        self.tmpCue = midicuer.MIDICue()
 
         # set file
         self.theFile = file_handling.FileObject(file=file)
-
 
     def onStart(self):
         """Create all the forms and variables, which are needed."""

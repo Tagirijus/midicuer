@@ -31,7 +31,7 @@ def main():
 
     args = args.parse_args()
 
-    app = npy_gui.midicuerApplication()
+    app = npy_gui.MIDICuerApplication()
     app.run()
 
 

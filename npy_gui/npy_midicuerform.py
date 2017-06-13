@@ -22,7 +22,8 @@ class CueList(npyscreen.MultiLineAction):
 
     def update_values(self):
         """Update values."""
-        pass
+        self.parent.parentApp.tmpCues.sort()
+        self.values = self.parent.parentApp.tmpCues._cues
 
         self.display()
 
@@ -35,11 +36,30 @@ class CueList(npyscreen.MultiLineAction):
 
     def add_cue(self, keypress=None):
         """Add a new cue."""
-        pass
+        # quick add a cue point - ask title and timecode and add it already
+        # detailed editing will be done on pressing enter in list
+        timecode = npyscreen.notify_input(
+            'Timecode:'
+        )
 
-        # switch to the cue edit form
-        self.parent.parentApp.setNextForm('MIDICueEdit')
-        self.parent.parentApp.switchFormNow()
+        if timecode is False:
+            return False
+
+        title = npyscreen.notify_input(
+            'Title:'
+        )
+
+        if title is False:
+            return False
+
+        # append this
+        self.parent.parentApp.tmpCues.append(
+            title=title,
+            timecode=timecode
+        )
+
+        # refresh list
+        self.update_values()
 
     def del_cue(self, keypress=None):
         """Ask to delete the cue and do it if yes."""
@@ -47,28 +67,31 @@ class CueList(npyscreen.MultiLineAction):
         if len(self.values) < 1:
             return False
 
+        # also cancel if it's the first entry
+        if self.cursor_line == 0:
+            return False
+
         # get selected cue
         cue = self.values[self.cursor_line]
 
-        cue_str = '"{}: {}"'.format(cue.client_id, cue.title)
         really = npyscreen.notify_yes_no(
-            'Really deactivate the cue {}?'.format(project_str),
+            'Really delete the cue "{}"?'.format(cue.title),
             form_color='WARNING'
         )
 
         # yepp, deactivate it
         if really:
-            pass
+            self.parent.parentApp.tmpCues.pop(self.cursor_line)
 
     def actionHighlighted(self, act_on_this, keypress=None):
         """Do something, because a key was pressed."""
         try:
-            pass
+            self.parent.parentApp.tmpCue = act_on_this
 
             # switch to the cue edit form
             self.parent.parentApp.setNextForm('MIDICueEdit')
             self.parent.parentApp.switchFormNow()
-        except Exception:
+        except:
             npyscreen.notify_confirm(
                 'Something went wrong, sorry!',
                 form_color='WARNING'

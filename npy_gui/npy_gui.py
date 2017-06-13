@@ -4,6 +4,7 @@ from general import file_handling
 from general import midicuer
 import npyscreen
 from npy_gui.npy_midicuerform import MIDICueForm
+from npy_gui.npy_midicueeditform import MIDICueEditForm
 from npy_gui.npy_projectform import ProjectForm
 
 
@@ -16,7 +17,7 @@ class MIDICuerApplication(npyscreen.NPSAppManaged):
 
         # set global temp variables
         self.tmpCues = midicuer.MIDICueList()
-        self.tmpCue = midicuer.MIDICue()
+        self.tmpCue = None
 
         # set file
         self.theFile = file_handling.FileObject(file=file)
@@ -28,6 +29,11 @@ class MIDICuerApplication(npyscreen.NPSAppManaged):
             'MAIN',
             MIDICueForm,
             name='midicuer'
+        )
+        self.addForm(
+            'MIDICueEdit',
+            MIDICueEditForm,
+            name='midicuer > edit cue'
         )
         self.addForm(
             'Project',

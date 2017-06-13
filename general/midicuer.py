@@ -101,7 +101,12 @@ class MIDICue(object):
 
     def __str__(self):
         """Represent yourself as a string (Timecode: Title)."""
-        return '{}: {}'.format(self.title, str(self.__repr__()))
+        return '{}: Tempo: {}, Beat: {} --- {}'.format(
+            str(self.__repr__()),
+            self.tempo,
+            self.beat,
+            self.title,
+        )
 
     @property
     def cuelist(self):
@@ -170,7 +175,19 @@ class MIDICue(object):
 
         # try to convert the timecode
         try:
-            self._timecode = Timecode(self._framerate, tc)
+            # check if given timecode exists already
+            add_me = Timecode(self._framerate, tc)
+            tc_exists = False if add_me == self._timecode else True
+            while tc_exists:
+                if add_me.frames not in [c.timecode.frames for c in self.cuelist]:
+                    tc_exists = False
+                else:
+                    add_me.frames += 1
+
+            self._timecode = add_me
+
+            # and resort the list
+            self.cuelist.sort()
         except:
             return False
 
@@ -274,6 +291,7 @@ class MIDICueList(object):
     ):
         """Initialize the class."""
         # add the needed first cuepoint at 00:00:00:00
+        self._cues = []
         self._cues = [
             MIDICue(
                 cuelist=self,
@@ -325,6 +343,10 @@ class MIDICueList(object):
             else:
                 self._cues[len(self._cues) - 1] = value
 
+    def sort(self):
+        """Sort the cues."""
+        self._cues = sorted(self._cues, key=lambda x: x.timecode.tc_to_ms())
+
     def append(
         self,
         title='Cue point',
@@ -372,11 +394,13 @@ class MIDICueList(object):
                 add_me.timecode.frames += 1
 
         self._cues.append(add_me)
+        self.calculate()
 
     def pop(self, index):
         """Pop a cue point with given index from list - but not the first."""
         if index != 0:
             self._cues.pop(index)
+            self.calculate()
 
     def index(self, cue):
         """Return index of cue."""
@@ -393,32 +417,6 @@ class MIDICueList(object):
         self._framerate = value
         for cue in self._cues:
             cue.timecode.framerate = value
-
-    @property
-    def def_timesignature_upper(self):
-        """Get def_timesignature_upper."""
-        return self._def_timesignature_upper
-
-    @def_timesignature_upper.setter
-    def def_timesignature_upper(self, value):
-        """Set def_timesignature_upper."""
-        try:
-            self._def_timesignature_upper = int(value)
-        except:
-            pass
-
-    @property
-    def def_timesignature_lower(self):
-        """Get def_timesignature_lower."""
-        return self._def_timesignature_lower
-
-    @def_timesignature_lower.setter
-    def def_timesignature_lower(self, value):
-        """Set def_timesignature_lower."""
-        try:
-            self._def_timesignature_lower = int(value)
-        except:
-            pass
 
     @property
     def resolution(self):
@@ -508,7 +506,7 @@ class MIDICueList(object):
 
         seconds = (delta / 2) * (x ** 2) + y0 * x
 
-        return seconds * 1000
+        return int(round(seconds * 1000))
 
 
     def calc_beat(self, start_tempo, end_tempo, time):

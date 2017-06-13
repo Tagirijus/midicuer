@@ -78,6 +78,18 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
             name='Beat:',
             begin_entry_at=20
         )
+        self.calc = self.add(
+            npyscreen.TitleSelectOne,
+            name='Calculate:',
+            begin_entry_at=20,
+            max_height=3,
+            scroll_exit=True,
+            values=[
+                'Beat',
+                'Tempo',
+                'Timecode'
+            ]
+        )
         self.timesignature_upper = self.add(
             npyscreen.TitleText,
             name='Timesig. upp.:',
@@ -98,6 +110,14 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
         self.tempo.value = str(self.parentApp.tmpCue.tempo)
         self.hold_tempo.value = [0] if self.parentApp.tmpCue.hold_tempo else []
         self.beat.value = str(self.parentApp.tmpCue.beat)
+
+        if self.parentApp.tmpCue.calc == 'beat':
+            self.calc.value = [0]
+        elif self.parentApp.tmpCue.calc == 'tempo':
+            self.calc.value = [1]
+        elif self.parentApp.tmpCue.calc == 'time':
+            self.calc.value = [2]
+
         self.timesignature_upper.value = str(self.parentApp.tmpCue.timesignature_upper)
         self.timesignature_lower.value = str(self.parentApp.tmpCue.timesignature_lower)
 
@@ -107,13 +127,26 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
         self.parentApp.tmpCue.comment = self.comment.value.replace('\n', ' ')
         self.parentApp.tmpCue.timecode = self.timecode.value
         self.parentApp.tmpCue.tempo = self.tempo.value
+
         if self.hold_tempo.value == [0]:
             self.parentApp.tmpCue.hold_tempo = True
         else:
             self.parentApp.tmpCue.hold_tempo = False
+
         self.parentApp.tmpCue.beat = self.beat.value
+
+        if self.calc.value == [0]:
+            self.parentApp.tmpCue.calc = 'beat'
+        elif self.calc.value == [1]:
+            self.parentApp.tmpCue.calc = 'tempo'
+        elif self.calc.value == [2]:
+            self.parentApp.tmpCue.calc = 'time'
+
         self.parentApp.tmpCue.timesignature_upper = self.timesignature_upper.value
         self.parentApp.tmpCue.timesignature_lower = self.timesignature_lower.value
+
+        # recalculate stuff
+        self.parentApp.tmpCues.calculate()
 
         # and switch form
         self.parentApp.setNextForm('MAIN')

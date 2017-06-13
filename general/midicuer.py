@@ -1,4 +1,10 @@
-"""The module for the MIDICue class."""
+"""
+The module for the MIDICue class.
+
+Todo:
+    Calculations do only work correctly (at least I assume, did not test), if
+    timecodes lowest value is set to milliseconds (not 24, 25, ... frames).
+"""
 
 from decimal import Decimal
 from timecode import Timecode as Timecode_original
@@ -254,6 +260,8 @@ class MIDICue(object):
             self._calc = 'beat'
         elif value == 'tempo' or value == 1:
             self._calc = 'tempo'
+        elif value == 'time' or value == 2:
+            self._calc = 'time'
 
 
 class MIDICueList(object):
@@ -593,4 +601,14 @@ class MIDICueList(object):
                     beats=beats_diff,
                     start_tempo=start_tempo,
                     time=time_diff
+                )
+
+            # calculate the time for this cue point
+            elif cue.calc == 'time':
+
+                # caluclate the new time for actual cue
+                cue.timecode = self._cues[i-1].timecode.tc_to_ms() + self.calc_time(
+                    beats=beats_diff,
+                    start_tempo=start_tempo,
+                    end_tempo=end_tempo
                 )

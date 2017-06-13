@@ -2,32 +2,7 @@
 
 from decimal import Decimal
 from timecode import Timecode as Timecode_original
-
-
-def beat_to_float(beat=1):
-    """Convert musical beat to float length."""
-    if beat != 0:
-        return (1.0 / beat) * 4
-    else:
-        return 0.0
-
-
-def float_to_beat(float=1.0):
-    """Convert float length to musical beat."""
-    if float != 0:
-        return round(1.0 / (float / 4))
-    else:
-        return 0
-
-
-def tempo_to_ms(tempo=120):
-    """Return milliseconds which will pass for one beat with the given [tempo]."""
-    return round((60.0 / tempo) * 1000)
-
-
-def ms_to_tempo(ms=1000):
-    """Return tempo according to one beat passed in the given time [ms]."""
-    return round((1000 / ms) * 60)
+import math
 
 
 class Timecode(Timecode_original):
@@ -53,7 +28,7 @@ class Timecode(Timecode_original):
     def tc_to_ms(self):
         """Convert timecode to integer milliseconds."""
         if self._int_framerate > 0:
-            return round(self.frame_number * (1000 / float(self._int_framerate)))
+            return int(round(self.frame_number * (1000 / float(self._int_framerate))))
         else:
             return 0
 
@@ -81,7 +56,7 @@ class MIDICue(object):
         timesignature_lower=4,
         tempo=120,
         hold_tempo=False,
-        bar=0
+        beat=0
     ):
         """Initialize the class."""
         self.cuelist = cuelist
@@ -108,14 +83,11 @@ class MIDICue(object):
 
         self.hold_tempo = hold_tempo
 
-        self.bar = bar
-        self.bar_readable = ''
+        self.beat = beat
+        self.beat_readable = ''
 
-        # what to calculate? 'bar' or 'tempo' ?
-        self.calc = 'bar'
-
-        # calculate
-        self.cuelist.calculate()
+        # what to calculate? 'beat' or 'tempo' ?
+        self.calc = 'beat'
 
     def __repr__(self):
         """Represent yourself."""
@@ -231,7 +203,9 @@ class MIDICue(object):
     def tempo(self, value):
         """Set tempo."""
         try:
-            self._tempo = int(value)
+            new_tempo = int(value)
+            if new_tempo > 0:
+                self._tempo = new_tempo
         except:
             pass
 
@@ -246,27 +220,27 @@ class MIDICue(object):
         self._hold_tempo = bool(value)
 
     @property
-    def bar(self):
-        """Get bar."""
-        return self._bar
+    def beat(self):
+        """Get beat."""
+        return self._beat
 
-    @bar.setter
-    def bar(self, value):
-        """Set bar."""
+    @beat.setter
+    def beat(self, value):
+        """Set beat."""
         try:
-            self._bar = Decimal(value)
+            self._beat = Decimal(value)
         except:
             pass
 
     @property
-    def bar_readable(self):
-        """Get bar_readable."""
-        return self._bar_readable
+    def beat_readable(self):
+        """Get beat_readable."""
+        return self._beat_readable
 
-    @bar_readable.setter
-    def bar_readable(self, value):
-        """Set bar_readable."""
-        self._bar_readable = str(value)
+    @beat_readable.setter
+    def beat_readable(self, value):
+        """Set beat_readable."""
+        self._beat_readable = str(value)
 
     @property
     def calc(self):
@@ -276,8 +250,8 @@ class MIDICue(object):
     @calc.setter
     def calc(self, value):
         """Set what to calculate."""
-        if value == 'bar' or value == 0:
-            self._calc = 'bar'
+        if value == 'beat' or value == 0:
+            self._calc = 'beat'
         elif value == 'tempo' or value == 1:
             self._calc = 'tempo'
 
@@ -314,7 +288,7 @@ class MIDICueList(object):
         self.def_timesignature_lower = def_timesignature_lower
 
         """
-        the resolution determines the stepsize for calculating the tempo or bar of
+        the resolution determines the stepsize for calculating the tempo or beat of
         a cuepoint. it should be a musical note length like: 1, 2, 4, 8, 1, 32, 64 ...
         the higher the value the higher the accuracy of calculation, but probably the
         higher the calculation time.
@@ -358,13 +332,25 @@ class MIDICueList(object):
         title='Cue point',
         comment='',
         timecode='0',
-        timesignature_upper=4,
-        timesignature_lower=4,
-        tempo=120,
+        timesignature_upper=None,
+        timesignature_lower=None,
+        tempo=None,
         hold_tempo=False,
-        bar=0
+        beat=None
     ):
         """Append a cue point."""
+        if timesignature_upper is None:
+            timesignature_upper = self._cues[len(self._cues) - 1].timesignature_upper
+
+        if timesignature_lower is None:
+            timesignature_lower = self._cues[len(self._cues) - 1].timesignature_lower
+
+        if tempo is None:
+            tempo = self._cues[len(self._cues) - 1].tempo
+
+        if beat is None:
+            beat = self._cues[len(self._cues) - 1].beat
+
         # generate cuepoint
         add_me = MIDICue(
             cuelist=self,
@@ -376,7 +362,7 @@ class MIDICueList(object):
             timesignature_lower=timesignature_lower,
             tempo=tempo,
             hold_tempo=hold_tempo,
-            bar=bar
+            beat=beat
         )
 
         # check if given timecode exists already
@@ -449,12 +435,162 @@ class MIDICueList(object):
         except:
             pass
 
+    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
+    def beat_to_float(self, beat=1):
+        """Convert musical beat to float length."""
+        if beat != 0:
+            return (1.0 / beat) * 4
+        else:
+            return 0.0
+
+    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
+    def float_to_beat(self, float=1.0):
+        """Convert float length to musical beat."""
+        if float != 0:
+            return round(1.0 / (float / 4))
+        else:
+            return 0
+
+    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
+    def tempo_to_ms(self, tempo=120):
+        """Return milliseconds which will pass for one beat with the given [tempo]."""
+        return round((60.0 / tempo) * 1000)
+
+    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
+    def ms_to_tempo(self, ms=1000):
+        """Return tempo according to one beat passed in the given time [ms]."""
+        return round((1000 / ms) * 60)
+
+    def calc_tempo(self, beats, start_tempo, end_tempo, beat=None):
+        """
+        Calculate tempo at beat in the given beats.
+
+        The equation is based on:
+
+        https://smartech.gatech.edu/bitstream/handle/1853/54588/WAC2016-49.pdf?sequence=1&isAllowed=y
+
+        and the linear function in:
+
+        https://github.com/echo66/bpm-timeline.js
+        """
+        x1 = Decimal(beats)
+        y0 = Decimal(60 / start_tempo)
+        y1 = Decimal(60 / end_tempo)
+        x = Decimal(beats) if beat is None else x1
+
+        return Decimal(60) / (y0 + (y1 - y0) * (x / x1))
+
+    def calc_end_tempo(self, beats, start_tempo, time):
+        """
+        Calculate end tempo to fit beats in time and start tempo.
+
+        Function also based on the sources mentioned in calc_tempo().
+        """
+        x1 = Decimal(beats)
+        y0 = Decimal(60) / Decimal(start_tempo)
+        t = Decimal(time) / Decimal(1000)
+
+        if x1 == 0:
+            return start_tempo
+        else:
+            return Decimal(60) / ((2 * t) / x1 - y0)
+
+    def calc_time(self, beats, start_tempo, end_tempo, beat=None):
+        """
+        Calculate milliseconds passing in the given period or at beat.
+
+        Function also based on the sources mentioned in calc_tempo().
+        """
+        x1 = Decimal(beats)
+        y0 = Decimal(60) / Decimal(start_tempo)
+        y1 = Decimal(60) / Decimal(end_tempo)
+        x = Decimal(beats) if beat is None else x1
+
+        delta = (y1 - y0) / x1
+
+        seconds = (delta / 2) * (x ** 2) + y0 * x
+
+        return seconds * 1000
+
+
+    def calc_beat(self, start_tempo, end_tempo, time):
+        """
+        Calculate the beats passed in milliseconds between tempos.
+
+        I used the equation form the mentioned sources and then I used:
+
+        http://www.wolframalpha.com/widgets/view.jsp?id=ad90fa06581eed56d398e0c50fb52357
+
+        to change the equation and solve it to x, so that it gives me the beat, instead
+        of the time.
+        """
+        y0 = Decimal(60) / Decimal(start_tempo)
+        y1 = Decimal(60) / Decimal(end_tempo)
+        t = Decimal(time) / Decimal(1000)
+
+        if y0 + y1 == 0:
+            return 0
+        else:
+            return (2 * t) / (y0 + y1)
+
     def calculate(self):
         """
         Calculate the spicy information.
 
         This is the core method of the whole programm. It will calculate
-        either the new bar or the new tempo for each cuepoint, depending
+        either the new beat or the new tempo for each cuepoint, depending
         on the MIDICue.calc variable.
         """
-        pass
+        # cancel if there are not more than one entries
+        if len(self._cues) < 1:
+            return False
+
+        first_skipped = False
+        # iter through all cuepoints
+        for i, cue in enumerate(self._cues):
+
+            # skip the first cue point, which should be at 0 ms and 0 beats
+            if i == 0:
+                continue
+
+            # get start tempo from cue-tempo before this cue
+            start_tempo = self._cues[i-1].tempo
+
+            # get end tempo from actual cue-tempo, if cue before this cue
+            # is not set to hold_tempo
+            end_tempo = (
+                self._cues[i-1].tempo
+                if self._cues[i-1].hold_tempo
+                else cue.tempo
+            )
+
+            # get beats difference between this and cue before
+            beats_diff = cue.beat - self._cues[i - 1].beat
+
+            # get time difference between this and the cue before
+            time_diff = cue.timecode.tc_to_ms() - self._cues[i-1].timecode.tc_to_ms()
+
+            # check which calculation method is set
+            # or set it to bar, if cue before has hold_time
+            if self._cues[i - 1].hold_tempo:
+                cue.calc = 'beat'
+
+            # caclulate the beat for this cue point
+            if cue.calc == 'beat':
+
+                # calculate the new beat for actual cue, based on beat of cue before
+                cue.beat = self._cues[i-1].beat + Decimal(self.calc_beat(
+                    start_tempo=start_tempo,
+                    end_tempo=end_tempo,
+                    time=time_diff
+                ))
+
+            # calculate the tempo for this cue point
+            elif cue.calc == 'tempo':
+
+                # calculate the new tempo for actual cue
+                cue.tempo = self.calc_end_tempo(
+                    beats=beats_diff,
+                    start_tempo=start_tempo,
+                    time=time_diff
+                )

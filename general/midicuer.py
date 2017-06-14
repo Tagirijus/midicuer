@@ -861,7 +861,7 @@ class MIDICueList(object):
                         end_tempo=cue.tempo,
                         beat=beat
                     )
-                    midi.addTempo(0, float(start_beat + beat), tempo)
+                    midi.addTempo(0, float(start_beat + beat), int(round(tempo)))
                     beat += Decimal(str(convert_beat(self.resolution)))
 
         # add last beat

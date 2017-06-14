@@ -203,7 +203,13 @@ class MIDICue(object):
     def tempo(self, value):
         """Set tempo."""
         try:
-            new_tempo = int(value)
+            value = float(value)
+            new_tempo = Decimal(
+                '{}.{:.3}'.format(
+                    str(value).split('.', 1)[0],
+                    str(value).split('.', 1)[1]
+                )
+            )
             if new_tempo > 0:
                 self._tempo = new_tempo
         except:
@@ -599,8 +605,8 @@ class MIDICueList(object):
         https://github.com/echo66/bpm-timeline.js
         """
         x1 = Decimal(beats)
-        y0 = Decimal(60 / start_tempo)
-        y1 = Decimal(60 / end_tempo)
+        y0 = Decimal(60) / Decimal(start_tempo)
+        y1 = Decimal(60) / Decimal(end_tempo)
         x = Decimal(beats) if beat is None else x1
 
         return Decimal(60) / (y0 + (y1 - y0) * (x / x1))
@@ -826,7 +832,7 @@ class MIDICueList(object):
         if not file.endswith('.mid'):
             file += '.mid'
 
-        midi = MIDIFile(1)
+        midi = MIDIFile(1, adjust_origin=True)
         midi.addTrackName(0, 0, 'Tagirijus - midicuer')
 
         # the great export loop
@@ -861,12 +867,15 @@ class MIDICueList(object):
                         end_tempo=cue.tempo,
                         beat=beat
                     )
-                    midi.addTempo(0, float(start_beat + beat), int(round(tempo)))
+
+                    midi.addTempo(0, float(start_beat + beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
 
-        # add last beat
-        beat = float(self._cues[len(self._cues) - 1].beat)
-        midi.addNote(0, 1, 60, beat, 1, 100)
+        # add last beat and tempo
+        beat = self._cues[len(self._cues) - 1].beat
+        tempo = self._cues[len(self._cues) - 1].tempo
+        midi.addNote(0, 1, 60, float(beat), 1, 100)
+        midi.addTempo(0, float(beat), tempo)
 
         # save it to the file
         with open(file, 'wb') as f:

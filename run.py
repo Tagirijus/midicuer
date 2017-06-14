@@ -11,6 +11,7 @@ Author: Manuel Senfft (www.tagirijus.de)
 import argparse
 from general import midicuer
 from npy_gui import npy_gui
+import os
 
 
 def main():
@@ -30,8 +31,13 @@ def main():
     )
 
     args = args.parse_args()
+    file = (
+        '{}/{}'.format(os.getcwd(), args.file)
+        if args.file is not None
+        else None
+    )
 
-    app = npy_gui.MIDICuerApplication()
+    app = npy_gui.MIDICuerApplication(file=file)
     app.run()
 
 

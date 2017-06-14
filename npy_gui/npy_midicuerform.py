@@ -196,9 +196,10 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.parentApp.theFile.file = self.choose_file()
         self.save()
 
-    def load(self):
+    def load(self, choose=True):
         """Load project."""
-        self.parentApp.theFile.file = self.choose_file()
+        if choose:
+            self.parentApp.theFile.file = self.choose_file()
         content = self.parentApp.theFile.load()
 
         if content is False:
@@ -213,7 +214,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         else:
             self.parentApp.tmpCues = self.parentApp.tmpCues.from_json(js=content)
 
-        self.update_title()
+        self.beforeEditing()
 
     def project(self):
         """Switch to project settings."""

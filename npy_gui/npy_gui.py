@@ -40,3 +40,6 @@ class MIDICuerApplication(npyscreen.NPSAppManaged):
             ProjectForm,
             name='midicuer > project settings'
         )
+
+        if self.theFile.valid:
+            self.getForm('MAIN').load(choose=False)

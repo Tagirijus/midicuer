@@ -9,6 +9,7 @@ Todo:
 from decimal import Decimal
 import json
 from timecode import Timecode as Timecode_original
+from midiutil.MidiFile import MIDIFile
 
 
 def convert_beat(beat=Decimal('1.0')):
@@ -816,3 +817,54 @@ class MIDICueList(object):
 
         # return new object
         return obj
+
+    def export_to_midi(self, file=None):
+        """Export the cuelist to midi tempo automation."""
+        if type(file) is not str:
+            return False
+
+        if not file.endswith('.mid'):
+            file += '.mid'
+
+        midi = MIDIFile(1)
+        midi.addTrackName(0, 0, 'Tagirijus - midicuer')
+
+        # the great export loop
+        for i, cue in enumerate(self._cues):
+
+            # skip first entry, because the loop will always add the last one first
+            if cue.first:
+                continue
+            else:
+                last_cue = self._cues[i - 1]
+
+            # add last ones beat
+            beat = float(cue.beat)
+            midi.addNote(0, 1, 60, beat, 1, 100)
+
+            # either add simple tempo and continue
+            if last_cue.hold_tempo:
+                beat = last_cue.beat
+                tempo = last_cue.tempo
+                midi.addTempo(0, float(beat), tempo)
+
+            # or iter through the tempo changes in resolution steps
+            else:
+                beat = last_cue.beat
+                end_beat = cue.beat
+                beat_diff = end_beat - beat
+                while beat < end_beat:
+                    tempo = self.calc_tempo(
+                        beats=beat_diff,
+                        start_tempo=last_cue.tempo,
+                        end_tempo=cue.tempo,
+                        beat=beat
+                    )
+                    midi.addTempo(0, float(beat), tempo)
+                    beat += Decimal(str(convert_beat(self.resolution)))
+
+        # save it to the file
+        with open(file, 'wb') as f:
+            midi.writeFile(f)
+
+        return True

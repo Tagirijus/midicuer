@@ -130,7 +130,7 @@ class CueListBox(npyscreen.BoxTitle):
 class MIDICueForm(npyscreen.FormBaseNewWithMenus):
     """MIDICueForm."""
 
-    def choose_file(self):
+    def choose_file(self, confirm_if_exists=False):
         """Choose a file to load, or save if save=True."""
         return npyscreen.selectFile(
             starting_value=os.getcwd(),
@@ -220,6 +220,18 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.parentApp.setNextForm('Project')
         self.parentApp.switchFormNow()
 
+    def export(self):
+        """Export to midi file."""
+        file = self.choose_file(confirm_if_exists=True)
+
+        exported = self.parentApp.tmpCues.export_to_midi(file=file)
+
+        if not exported:
+            npyscreen.notify_confirm(
+                'Could not export to midi file ...',
+                form_color='WARNING'
+            )
+
     def exit(self):
         """Exit the programm."""
         self.parentApp.setNextForm(None)
@@ -234,6 +246,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.m.addItem(text='Save as...', onSelect=self.save_as, shortcut='S')
         self.m.addItem(text='Load', onSelect=self.load, shortcut='l')
         self.m.addItem(text='Project', onSelect=self.project, shortcut='p')
+        self.m.addItem(text='Export', onSelect=self.export, shortcut='E')
         self.m.addItem(text='Exit', onSelect=self.exit, shortcut='e')
 
         # create the box with the project list and update the list

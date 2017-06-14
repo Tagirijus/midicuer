@@ -108,6 +108,18 @@ class CueListBox(npyscreen.BoxTitle):
 class MIDICueForm(npyscreen.FormBaseNewWithMenus):
     """MIDICueForm."""
 
+    def save(self):
+        """Save project."""
+        pass
+
+    def save_as(self):
+        """Save project as."""
+        pass
+
+    def load(self):
+        """Load project."""
+        pass
+
     def project(self):
         """Switch to project settings."""
         self.parentApp.setNextForm('Project')
@@ -122,6 +134,9 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         """Initialize the form with its widgets."""
         # create the menu
         self.m = self.new_menu(name='Menu')
+        self.m.addItem(text='Save', onSelect=self.save, shortcut='s')
+        self.m.addItem(text='Save as...', onSelect=self.save_as, shortcut='S')
+        self.m.addItem(text='Load', onSelect=self.load, shortcut='l')
         self.m.addItem(text='Project', onSelect=self.project, shortcut='p')
         self.m.addItem(text='Exit', onSelect=self.exit, shortcut='e')
 

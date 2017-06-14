@@ -307,6 +307,87 @@ class MIDICue(object):
             sort_keys=True
         )
 
+    @classmethod
+    def from_json(cls, js=None):
+        """Convert all data from json format."""
+        if js is None:
+            return cls()
+
+        # get js as dict
+        if type(js) is not dict:
+            try:
+                js = json.loads(js)
+            except Exception:
+                # return default object
+                return cls()
+
+        # create object from json
+        if 'first' in js.keys():
+            first = js['first']
+        else:
+            first = None
+
+        if 'title' in js.keys():
+            title = js['title']
+        else:
+            title = None
+
+        if 'comment' in js.keys():
+            comment = js['comment']
+        else:
+            comment = None
+
+        if 'framerate' in js.keys():
+            framerate = js['framerate']
+        else:
+            framerate = None
+
+        if 'timecode' in js.keys():
+            timecode = js['timecode']
+        else:
+            timecode = None
+
+        if 'timesignature_upper' in js.keys():
+            timesignature_upper = js['timesignature_upper']
+        else:
+            timesignature_upper = None
+
+        if 'timesignature_lower' in js.keys():
+            timesignature_lower = js['timesignature_lower']
+        else:
+            timesignature_lower = None
+
+        if 'tempo' in js.keys():
+            tempo = js['tempo']
+        else:
+            tempo = None
+
+        if 'hold_tempo' in js.keys():
+            hold_tempo = js['hold_tempo']
+        else:
+            hold_tempo = None
+
+        if 'beat' in js.keys():
+            beat = js['beat']
+        else:
+            beat = None
+
+
+        # return new object
+        return cls(
+            cuelist=cuelist,
+            first=first,
+            title=title,
+            comment=comment,
+            framerate=framerate,
+            timecode=timecode,
+            timesignature_upper=timesignature_upper,
+            timesignature_lower=timesignature_lower,
+            tempo=tempo,
+            hold_tempo=hold_tempo,
+            beat=beat
+        )
+
 
 class MIDICueList(object):
     """The object holding some settings and a list with the MIDICues."""
@@ -314,19 +395,23 @@ class MIDICueList(object):
     def __init__(
         self,
         framerate=None,
-        resolution=64
+        resolution=64,
+        cues=None
     ):
         """Initialize the class."""
         # add the needed first cuepoint at 00:00:00:00
-        self._cues = []
-        self._cues = [
-            MIDICue(
-                cuelist=self,
-                first=True,
-                title='Start',
-                timecode='0'
-            )
-        ]
+        if cues is None:
+            self._cues = []
+            self._cues = [
+                MIDICue(
+                    cuelist=self,
+                    first=True,
+                    title='Start',
+                    timecode='0'
+                )
+            ]
+        else:
+            self._cues = cues
 
         self.framerate = 1000 if framerate is None else framerate
 
@@ -626,6 +711,12 @@ class MIDICueList(object):
                     end_tempo=end_tempo
                 )
 
+    def convert_and_link(self):
+        """Convert MIDICues to objects and link them to self."""
+        for cue in self._cues:
+            cue = MIDICue().from_json(js=cue)
+            cue.cuelist = self
+
     def to_dict(self):
         """Convert object to dict."""
         out = {}
@@ -653,3 +744,45 @@ class MIDICueList(object):
             ensure_ascii=ensure_ascii,
             sort_keys=True
         )
+
+    @classmethod
+    def from_json(cls, js=None):
+        """Convert all data from json format."""
+        if js is None:
+            return cls()
+
+        # get js as dict
+        if type(js) is not dict:
+            try:
+                js = json.loads(js)
+            except Exception:
+                # return default object
+                return cls()
+
+        # create object from json
+        if 'framerate' in js.keys():
+            framerate = js['framerate']
+        else:
+            framerate = None
+
+        if 'resolution' in js.keys():
+            resolution = js['resolution']
+        else:
+            resolution = None
+
+        if 'cues' in js.keys():
+            cues = js['cues']
+        else:
+            cues = None
+
+        # convert MIDICues to object and link them to the MIDICueList
+        obj = cls(
+            framerate=framerate,
+            resolution=resolution,
+            cues=cues
+        )
+
+        obj.convert_and_link()
+
+        # return new object
+        return obj

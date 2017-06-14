@@ -59,7 +59,7 @@ class FileObject(object):
         """Save the string to the file."""
         # cancel if filename is not valid
         if not self.valid:
-            return 'No valid file.'
+            return False
 
         # save the string
         with open(self.file, 'w') as f:
@@ -71,7 +71,7 @@ class FileObject(object):
         """Load the string from file.."""
         # cancel if filename is not valid
         if not self.valid:
-            return ''
+            return False
 
         # load the string
         with open(self.file, 'w') as f:

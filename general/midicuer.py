@@ -839,7 +839,7 @@ class MIDICueList(object):
                 last_cue = self._cues[i - 1]
 
             # add last ones beat
-            beat = float(cue.beat)
+            beat = float(last_cue.beat)
             midi.addNote(0, 1, 60, beat, 1, 100)
 
             # either add simple tempo and continue
@@ -862,6 +862,10 @@ class MIDICueList(object):
                     )
                     midi.addTempo(0, float(beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
+
+        # add last beat
+        beat = float(self._cues[len(self._cues) - 1].beat)
+        midi.addNote(0, 1, 60, beat, 1, 100)
 
         # save it to the file
         with open(file, 'wb') as f:

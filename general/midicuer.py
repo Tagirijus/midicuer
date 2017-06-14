@@ -11,6 +11,14 @@ import json
 from timecode import Timecode as Timecode_original
 
 
+def convert_beat(beat=Decimal('1.0')):
+    """Convert musical beat to decimal beat or vice versa."""
+    if beat != 0:
+        return (Decimal(1) / Decimal(str(beat))) * Decimal(4)
+    else:
+        return Decimal('0')
+
+
 class Timecode(Timecode_original):
     """Improved Timecode."""
 
@@ -58,8 +66,6 @@ class MIDICue(object):
         comment='',
         framerate='ms',
         timecode='0',
-        timesignature_upper=4,
-        timesignature_lower=4,
         tempo=120,
         hold_tempo=False,
         beat=0
@@ -77,20 +83,11 @@ class MIDICue(object):
         self._timecode = Timecode(self._framerate, 0)
         self.timecode = timecode
 
-        """
-        upper and lower specifying the time signature. the upper value is the amount
-        of notes in a bar and the lower value is the note lengths, which should
-        be something like typical musical note lengths like: 1, 2, 4, 8, 16, 32, 64 ...
-        """
-        self.timesignature_upper = timesignature_upper
-        self.timesignature_lower = timesignature_lower
-
         self.tempo = tempo
 
         self.hold_tempo = hold_tempo
 
         self.beat = beat
-        self.beat_readable = ''
 
         # what to calculate? 'beat' or 'tempo' ?
         self.calc = 'beat'
@@ -101,10 +98,10 @@ class MIDICue(object):
 
     def __str__(self):
         """Represent yourself as a string (Timecode: Title)."""
-        return '{}: Tempo: {}, Beat: {} --- {}'.format(
+        return '{}: Tempo: {}, {} --- {}'.format(
             str(self.__repr__()),
             self.tempo,
-            self.beat,
+            self.beat_readable(),
             self.title,
         )
 
@@ -146,7 +143,7 @@ class MIDICue(object):
     @timecode.setter
     def timecode(self, value):
         """Set the timecode."""
-        # do not change the first timecode at 0 ms
+        # do not change the first cue point
         if self.first:
             return False
 
@@ -197,32 +194,6 @@ class MIDICue(object):
             self._timecode = add_me
 
     @property
-    def timesignature_upper(self):
-        """Get timesignature_upper."""
-        return self._timesignature_upper
-
-    @timesignature_upper.setter
-    def timesignature_upper(self, value):
-        """Set timesignature_upper."""
-        try:
-            self._timesignature_upper = int(value)
-        except:
-            pass
-
-    @property
-    def timesignature_lower(self):
-        """Get timesignature_lower."""
-        return self._timesignature_lower
-
-    @timesignature_lower.setter
-    def timesignature_lower(self, value):
-        """Set timesignature_lower."""
-        try:
-            self._timesignature_lower = int(value)
-        except:
-            pass
-
-    @property
     def tempo(self):
         """Get tempo."""
         return self._tempo
@@ -255,20 +226,38 @@ class MIDICue(object):
     @beat.setter
     def beat(self, value):
         """Set beat."""
+        # do not change the first cue point
+        if self.first:
+            self._beat = Decimal('0')
+            return False
+
         try:
             self._beat = Decimal(value)
         except:
             pass
 
-    @property
-    def beat_readable(self):
-        """Get beat_readable."""
-        return self._beat_readable
+    def beat_readable(self, beat=None):
+        """Return readable beat string."""
+        # return nothing, if no cuelist is set
+        if self.cuelist is None or self.first:
+            return 'Bar 1, Beat 1.0'
 
-    @beat_readable.setter
-    def beat_readable(self, value):
-        """Set beat_readable."""
-        self._beat_readable = str(value)
+        # get parameter beat, or self._beat
+        try:
+            beat = Decimal(beat)
+        except:
+            beat = self._beat
+
+        # init bar and bar values
+        one_bar = (
+            Decimal(self.cuelist.timesignature_upper) *
+            convert_beat(self.cuelist.timesignature_lower)
+        )
+
+        bar = int(str(beat / one_bar).split('.', 1)[0]) + 1
+        beats = (beat % one_bar) + 1
+
+        return 'Bar {}, Beat {:.5}'.format(bar, beats)
 
     @property
     def calc(self):
@@ -296,8 +285,6 @@ class MIDICue(object):
         out['comment'] = self.comment
         out['framerate'] = self.timecode.framerate
         out['timecode'] = self.timecode.tc_to_ms()
-        out['timesignature_upper'] = self.timesignature_upper
-        out['timesignature_lower'] = self.timesignature_lower
         out['tempo'] = self.tempo
         out['hold_tempo'] = self.hold_tempo
         out['beat'] = str(self.beat)
@@ -353,16 +340,6 @@ class MIDICue(object):
         else:
             timecode = None
 
-        if 'timesignature_upper' in js.keys():
-            timesignature_upper = js['timesignature_upper']
-        else:
-            timesignature_upper = None
-
-        if 'timesignature_lower' in js.keys():
-            timesignature_lower = js['timesignature_lower']
-        else:
-            timesignature_lower = None
-
         if 'tempo' in js.keys():
             tempo = js['tempo']
         else:
@@ -386,8 +363,6 @@ class MIDICue(object):
             comment=comment,
             framerate=framerate,
             timecode=timecode,
-            timesignature_upper=timesignature_upper,
-            timesignature_lower=timesignature_lower,
             tempo=tempo,
             hold_tempo=hold_tempo,
             beat=beat
@@ -401,6 +376,8 @@ class MIDICueList(object):
         self,
         framerate=None,
         resolution=64,
+        timesignature_upper=4,
+        timesignature_lower=4,
         cues=None
     ):
         """Initialize the class."""
@@ -427,6 +404,14 @@ class MIDICueList(object):
         higher the calculation time.
         """
         self.resolution = resolution
+
+        """
+        upper and lower specifying the time signature. the upper value is the amount
+        of notes in a bar and the lower value is the note lengths, which should
+        be something like typical musical note lengths like: 1, 2, 4, 8, 16, 32, 64 ...
+        """
+        self.timesignature_upper = timesignature_upper
+        self.timesignature_lower = timesignature_lower
 
     def __repr__(self):
         """Represent yourself as the cuelist."""
@@ -469,19 +454,11 @@ class MIDICueList(object):
         title='Cue point',
         comment='',
         timecode='0',
-        timesignature_upper=None,
-        timesignature_lower=None,
         tempo=None,
         hold_tempo=False,
         beat=None
     ):
         """Append a cue point."""
-        if timesignature_upper is None:
-            timesignature_upper = self._cues[len(self._cues) - 1].timesignature_upper
-
-        if timesignature_lower is None:
-            timesignature_lower = self._cues[len(self._cues) - 1].timesignature_lower
-
         if tempo is None:
             tempo = self._cues[len(self._cues) - 1].tempo
 
@@ -495,8 +472,6 @@ class MIDICueList(object):
             comment=comment,
             framerate=self.framerate,
             timecode=timecode,
-            timesignature_upper=timesignature_upper,
-            timesignature_lower=timesignature_lower,
             tempo=tempo,
             hold_tempo=hold_tempo,
             beat=beat
@@ -549,31 +524,31 @@ class MIDICueList(object):
         except:
             pass
 
-    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
-    def beat_to_float(self, beat=1):
-        """Convert musical beat to float length."""
-        if beat != 0:
-            return (1.0 / beat) * 4
-        else:
-            return 0.0
+    @property
+    def timesignature_upper(self):
+        """Get timesignature_upper."""
+        return self._timesignature_upper
 
-    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
-    def float_to_beat(self, float=1.0):
-        """Convert float length to musical beat."""
-        if float != 0:
-            return round(1.0 / (float / 4))
-        else:
-            return 0
+    @timesignature_upper.setter
+    def timesignature_upper(self, value):
+        """Set timesignature_upper."""
+        try:
+            self._timesignature_upper = int(value)
+        except:
+            pass
 
-    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
-    def tempo_to_ms(self, tempo=120):
-        """Return milliseconds which will pass for one beat with the given [tempo]."""
-        return round((60.0 / tempo) * 1000)
+    @property
+    def timesignature_lower(self):
+        """Get timesignature_lower."""
+        return self._timesignature_lower
 
-    # !!!!!! ??? -> DO I REALLY NEED THIS METHOD <- ???
-    def ms_to_tempo(self, ms=1000):
-        """Return tempo according to one beat passed in the given time [ms]."""
-        return round((1000 / ms) * 60)
+    @timesignature_lower.setter
+    def timesignature_lower(self, value):
+        """Set timesignature_lower."""
+        try:
+            self._timesignature_lower = int(value)
+        except:
+            pass
 
     def calc_tempo(self, beats, start_tempo, end_tempo, beat=None):
         """
@@ -731,6 +706,8 @@ class MIDICueList(object):
         out['type'] = self.__class__.__name__
         out['framerate'] = self.framerate
         out['resolution'] = self.resolution
+        out['timesignature_upper'] = self.timesignature_upper
+        out['timesignature_lower'] = self.timesignature_lower
 
         # fetch the jsons from the cues
         out['cues'] = []
@@ -776,6 +753,16 @@ class MIDICueList(object):
         else:
             resolution = None
 
+        if 'timesignature_upper' in js.keys():
+            timesignature_upper = js['timesignature_upper']
+        else:
+            timesignature_upper = None
+
+        if 'timesignature_lower' in js.keys():
+            timesignature_lower = js['timesignature_lower']
+        else:
+            timesignature_lower = None
+
         if 'cues' in js.keys():
             cues = js['cues']
         else:
@@ -785,6 +772,8 @@ class MIDICueList(object):
         obj = cls(
             framerate=framerate,
             resolution=resolution,
+            timesignature_upper=timesignature_upper,
+            timesignature_lower=timesignature_lower,
             cues=cues
         )
 

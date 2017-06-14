@@ -90,16 +90,6 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
                 'Timecode'
             ]
         )
-        self.timesignature_upper = self.add(
-            npyscreen.TitleText,
-            name='Timesig. upp.:',
-            begin_entry_at=20
-        )
-        self.timesignature_lower = self.add(
-            npyscreen.TitleText,
-            name='Timesig. low.:',
-            begin_entry_at=20
-        )
 
     def beforeEditing(self):
         """Get values."""
@@ -117,9 +107,6 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
             self.calc.value = [1]
         elif self.parentApp.tmpCue.calc == 'time':
             self.calc.value = [2]
-
-        self.timesignature_upper.value = str(self.parentApp.tmpCue.timesignature_upper)
-        self.timesignature_lower.value = str(self.parentApp.tmpCue.timesignature_lower)
 
     def on_ok(self, keypress=None):
         """Store new values."""
@@ -141,9 +128,6 @@ class MIDICueEditForm(npyscreen.ActionFormWithMenus):
             self.parentApp.tmpCue.calc = 'tempo'
         elif self.calc.value == [2]:
             self.parentApp.tmpCue.calc = 'time'
-
-        self.parentApp.tmpCue.timesignature_upper = self.timesignature_upper.value
-        self.parentApp.tmpCue.timesignature_lower = self.timesignature_lower.value
 
         # recalculate stuff
         self.parentApp.tmpCues.calculate()

@@ -36,16 +36,30 @@ class ProjectForm(npyscreen.ActionFormWithMenus):
             npyscreen.TitleText,
             name='Resolution:'
         )
+        self.timesignature_upper = self.add(
+            npyscreen.TitleText,
+            name='Timesig. upp.:',
+            begin_entry_at=20
+        )
+        self.timesignature_lower = self.add(
+            npyscreen.TitleText,
+            name='Timesig. low.:',
+            begin_entry_at=20
+        )
 
     def beforeEditing(self):
         """Get values."""
         self.framerate.value = str(self.parentApp.tmpCues.framerate)
         self.resolution.value = str(self.parentApp.tmpCues.resolution)
+        self.timesignature_upper.value = str(self.parentApp.tmpCues.timesignature_upper)
+        self.timesignature_lower.value = str(self.parentApp.tmpCues.timesignature_lower)
 
     def on_ok(self, keypress=None):
         """Store new values."""
         self.parentApp.tmpCues.framerate = self.framerate.value
         self.parentApp.tmpCues.resolution = self.resolution.value
+        self.parentApp.tmpCues.timesignature_upper = self.timesignature_upper.value
+        self.parentApp.tmpCues.timesignature_lower = self.timesignature_lower.value
 
         # and switch form
         self.parentApp.setNextForm('MAIN')

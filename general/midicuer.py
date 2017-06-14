@@ -471,6 +471,15 @@ class MIDICueList(object):
             else:
                 self._cues[len(self._cues) - 1] = value
 
+    def new(self):
+        """Return self with empty list."""
+        return MIDICueList(
+            framerate=self.framerate,
+            resolution=self.resolution,
+            timesignature_upper=self.timesignature_upper,
+            timesignature_lower=self.timesignature_lower,
+        )
+
     def sort(self):
         """Sort the cues."""
         self._cues = sorted(self._cues, key=lambda x: x.timecode.tc_to_ms())

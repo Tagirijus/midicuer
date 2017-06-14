@@ -137,6 +137,18 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
             confirm_if_exists=False
         )
 
+    def new(self):
+        """Create a new project."""
+        really = npyscreen.notify_yes_no(
+            'Really create a new project and clear actual (maybe unsaved!?) project?',
+            form_color='WARNING'
+        )
+
+        if really:
+            self.parentApp.tmpCues = self.parentApp.tmpCues.new()
+            self.parentApp.theFile.file = None
+            self.beforeEditing()
+
     def save(self):
         """Save project."""
         # prepare values
@@ -217,6 +229,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         """Initialize the form with its widgets."""
         # create the menu
         self.m = self.new_menu(name='Menu')
+        self.m.addItem(text='New', onSelect=self.new, shortcut='n')
         self.m.addItem(text='Save', onSelect=self.save, shortcut='s')
         self.m.addItem(text='Save as...', onSelect=self.save_as, shortcut='S')
         self.m.addItem(text='Load', onSelect=self.load, shortcut='l')

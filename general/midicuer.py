@@ -850,17 +850,18 @@ class MIDICueList(object):
 
             # or iter through the tempo changes in resolution steps
             else:
-                beat = last_cue.beat
+                start_beat = last_cue.beat
                 end_beat = cue.beat
-                beat_diff = end_beat - beat
-                while beat < end_beat:
+                beat_diff = end_beat - start_beat
+                beat = Decimal('0')
+                while start_beat + beat < end_beat:
                     tempo = self.calc_tempo(
                         beats=beat_diff,
                         start_tempo=last_cue.tempo,
                         end_tempo=cue.tempo,
                         beat=beat
                     )
-                    midi.addTempo(0, float(beat), tempo)
+                    midi.addTempo(0, float(start_beat + beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
 
         # add last beat

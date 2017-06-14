@@ -15,11 +15,35 @@ class CueList(npyscreen.MultiLineAction):
         # set up key shortcuts
         self.add_handlers({
             curses.KEY_IC: self.add_cue,
-            curses.KEY_DC: self.del_cue
+            curses.KEY_DC: self.del_cue,
+            'b': self.beat_up,
+            'B': self.beat_down,
+            't': self.tempo_up,
+            'T': self.tempo_down
         })
 
         # set up additional multiline options
         self.slow_scroll = True
+
+    def beat_up(self, keypress=None):
+        """Add beat."""
+        self.values[self.cursor_line].beat_up()
+        self.update_values()
+
+    def beat_down(self, keypress=None):
+        """Substract beat."""
+        self.values[self.cursor_line].beat_down()
+        self.update_values()
+
+    def tempo_up(self, keypress=None):
+        """Add tempo."""
+        self.values[self.cursor_line].tempo_up()
+        self.update_values()
+
+    def tempo_down(self, keypress=None):
+        """Substract tempo."""
+        self.values[self.cursor_line].tempo_down()
+        self.update_values()
 
     def update_values(self):
         """Update values."""
@@ -27,9 +51,6 @@ class CueList(npyscreen.MultiLineAction):
         self.values = self.parent.parentApp.tmpCues._cues
 
         self.display()
-
-        # clear filter for not showing doubled entries (npyscreen bug?)
-        self.clear_filter()
 
     def display_value(self, vl):
         """Display values."""

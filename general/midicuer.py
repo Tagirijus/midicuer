@@ -208,6 +208,18 @@ class MIDICue(object):
         except:
             pass
 
+    def tempo_up(self):
+        """Add 1 to the tempo."""
+        self.calc = 'beat'
+        self.tempo = self.tempo + 1
+        self.cuelist.calculate()
+
+    def tempo_down(self):
+        """Substract 1 from the tempo."""
+        self.calc = 'beat'
+        self.tempo = self.tempo - 1
+        self.cuelist.calculate()
+
     @property
     def hold_tempo(self):
         """Get hold_tempo."""
@@ -235,6 +247,20 @@ class MIDICue(object):
             self._beat = Decimal(value)
         except:
             pass
+
+    def beat_up(self):
+        """Add resolution to beat."""
+        if self.cuelist is not None and not self.first:
+            self.calc = 'tempo'
+            self.beat = self.beat + convert_beat(self.cuelist.resolution)
+            self.cuelist.calculate()
+
+    def beat_down(self):
+        """Substract resolution from beat."""
+        if self.cuelist is not None:
+            self.calc = 'tempo'
+            self.beat = self.beat - convert_beat(self.cuelist.resolution)
+            self.cuelist.calculate()
 
     def beat_readable(self, beat=None):
         """Return readable beat string."""

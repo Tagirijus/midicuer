@@ -2,6 +2,7 @@
 
 import curses
 import npyscreen
+import os
 
 
 class CueList(npyscreen.MultiLineAction):
@@ -108,17 +109,78 @@ class CueListBox(npyscreen.BoxTitle):
 class MIDICueForm(npyscreen.FormBaseNewWithMenus):
     """MIDICueForm."""
 
+    def choose_file(self):
+        """Choose a file to load, or save if save=True."""
+        return npyscreen.selectFile(
+            starting_value=os.getcwd(),
+            confirm_if_exists=False
+        )
+
     def save(self):
         """Save project."""
-        pass
+        # prepare values
+        is_valid = self.parentApp.theFile.valid
+        is_new = self.parentApp.theFile.new_file
+        content = self.parentApp.tmpCues.to_json()
+
+        # simplest save: valid and new file
+        if is_valid and is_new:
+            saved = self.parentApp.theFile.save(content)
+
+            if not saved:
+                npyscreen.notify_confirm(
+                    'Saving went wrong.',
+                    form_color='WARNING'
+                )
+                return False
+
+        # is valid, but not new, ask for overwrite
+        elif is_valid and not is_new:
+            overwrite = npyscreen.notify_yes_no(
+                'Overwrite "{}"?'.format(self.parentApp.theFile.file),
+                form_color='DANGER'
+            )
+
+            if overwrite:
+                saved = self.parentApp.theFile.save(content)
+
+                if not saved:
+                    npyscreen.notify_confirm(
+                        'Saving went wrong.',
+                        form_color='WARNING'
+                    )
+                    return False
+
+        # not valid, choose new file
+        else:
+            self.parentApp.theFile.file = self.choose_file()
+            self.save()
+
+        self.update_title()
 
     def save_as(self):
         """Save project as."""
-        pass
+        self.parentApp.theFile.file = self.choose_file()
+        self.save()
 
     def load(self):
         """Load project."""
-        pass
+        self.parentApp.theFile.file = self.choose_file()
+        content = self.parentApp.theFile.load()
+
+        if content is False:
+            retry = npyscreen.notify_yes_no(
+                'Loading went wrong. Choose another file?',
+                form_color='WARNING'
+            )
+
+            if retry:
+                self.load()
+
+        else:
+            self.parentApp.tmpCues = self.parentApp.tmpCues.from_json(js=content)
+
+        self.update_title()
 
     def project(self):
         """Switch to project settings."""
@@ -146,7 +208,15 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
             name='Cues'
         )
 
+    def update_title(self):
+        """Update form title."""
+        self.name = 'midicuer ({})'.format(
+            self.parentApp.theFile.file
+        )
+
     def beforeEditing(self):
         """Get values."""
+        self.update_title()
+
         # update cues
         self.cue_box.entry_widget.update_values()

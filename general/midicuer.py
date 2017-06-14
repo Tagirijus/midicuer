@@ -7,6 +7,7 @@ Todo:
 """
 
 from decimal import Decimal
+import json
 from timecode import Timecode as Timecode_original
 
 
@@ -172,10 +173,13 @@ class MIDICue(object):
         else:
             return False
 
-        # try to convert the timecode
-        try:
+        # convert the timecode
+        add_me = Timecode(self._framerate, tc)
+
+        # cuelist already set - check for doubled entries and shit
+        if self.cuelist is not None:
+
             # check if given timecode exists already
-            add_me = Timecode(self._framerate, tc)
             tc_exists = False if add_me == self._timecode else True
             while tc_exists:
                 if add_me.frames not in [c.timecode.frames for c in self.cuelist]:
@@ -187,8 +191,10 @@ class MIDICue(object):
 
             # and resort the list
             self.cuelist.sort()
-        except:
-            return False
+
+        # cuelist not linked yet
+        else:
+            self._timecode = add_me
 
     @property
     def timesignature_upper(self):
@@ -288,7 +294,7 @@ class MIDICue(object):
         out['first'] = self.first
         out['title'] = self.title
         out['comment'] = self.comment
-        out['framerate'] = self.framerate
+        out['framerate'] = self.timecode.framerate
         out['timecode'] = self.timecode.tc_to_ms()
         out['timesignature_upper'] = self.timesignature_upper
         out['timesignature_lower'] = self.timesignature_lower
@@ -375,7 +381,6 @@ class MIDICue(object):
 
         # return new object
         return cls(
-            cuelist=cuelist,
             first=first,
             title=title,
             comment=comment,
@@ -528,7 +533,8 @@ class MIDICueList(object):
         """Set the framerate for itself and all its cues entries."""
         self._framerate = value
         for cue in self._cues:
-            cue.timecode.framerate = value
+            if type(cue) is Timecode:
+                cue.timecode.framerate = value
 
     @property
     def resolution(self):
@@ -713,9 +719,9 @@ class MIDICueList(object):
 
     def convert_and_link(self):
         """Convert MIDICues to objects and link them to self."""
-        for cue in self._cues:
-            cue = MIDICue().from_json(js=cue)
-            cue.cuelist = self
+        for i, cue in enumerate(self._cues):
+            self._cues[i] = MIDICue().from_json(js=cue)
+            self._cues[i].cuelist = self
 
     def to_dict(self):
         """Convert object to dict."""
@@ -732,7 +738,7 @@ class MIDICueList(object):
             try:
                 out['cues'].append(cue.to_dict())
             except:
-                out['cues'].append(cue)
+                out['cues'].append(str(cue))
 
         return out
 

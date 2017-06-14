@@ -12,6 +12,12 @@ class FileObject(object):
 
     def validate_file(self):
         """Check if file is valid."""
+        # no file set
+        if self._file is None:
+            self._new_file = True
+            self._valid = False
+            return False
+
         # check if file exists already
         if os.path.exists(self._file):
             self._new_file = False
@@ -32,7 +38,13 @@ class FileObject(object):
     @file.setter
     def file(self, value=None):
         """Set the file and validate it."""
-        self._file = str(value)
+        self._file = value
+
+        # check if string and append fileending
+        if type(self._file) is str:
+            if not self._file.endswith('.midicuer'):
+                self._file += '.midicuer'
+
         self.validate_file()
 
     @property
@@ -67,14 +79,14 @@ class FileObject(object):
 
         return True
 
-    def load(self, string=None):
-        """Load the string from file.."""
+    def load(self):
+        """Load a string from file and return it."""
         # cancel if filename is not valid
         if not self.valid:
             return False
 
         # load the string
-        with open(self.file, 'w') as f:
+        with open(self.file, 'r') as f:
             out = f.read()
 
         return out

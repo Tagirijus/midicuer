@@ -203,9 +203,9 @@ class MIDICue(object):
     def tempo(self, value):
         """Set tempo."""
         try:
-            new_tempo = Decimal(str(value))
+            new_tempo = int(round(Decimal(str(value))))
             if new_tempo > 0:
-                self._tempo = round(new_tempo, 3)
+                self._tempo = new_tempo
         except:
             pass
 
@@ -312,7 +312,7 @@ class MIDICue(object):
         out['comment'] = self.comment
         out['framerate'] = self.timecode.framerate
         out['timecode'] = self.timecode.tc_to_ms()
-        out['tempo'] = str(self.tempo)
+        out['tempo'] = self.tempo
         out['hold_tempo'] = self.hold_tempo
         out['beat'] = str(self.beat)
 
@@ -603,7 +603,7 @@ class MIDICueList(object):
         y1 = Decimal(60) / Decimal(end_tempo)
         x = Decimal(beats) if beat is None else Decimal(beat)
 
-        return round(Decimal(60) / (y0 + (y1 - y0) * (x / x1)), 3)
+        return int(round(Decimal(60) / (y0 + (y1 - y0) * (x / x1))))
 
     def calc_end_tempo(self, beats, start_tempo, time):
         """
@@ -618,7 +618,7 @@ class MIDICueList(object):
         if x1 == 0:
             return start_tempo
         else:
-            return round(Decimal(60) / ((2 * t) / x1 - y0), 3)
+            return int(round(Decimal(60) / ((2 * t) / x1 - y0)))
 
     def calc_time(self, beats, start_tempo, end_tempo, beat=None):
         """
@@ -865,7 +865,7 @@ class MIDICueList(object):
                     midi.addTempo(0, float(start_beat + beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
                     with open('DEBUG.txt', 'a') as debug:
-                        debug.write('\n' + str(Decimal(str(convert_beat(self.resolution)))))
+                        debug.write('\n' + str(beat))
 
         # add last beat and tempo
         beat = self._cues[len(self._cues) - 1].beat

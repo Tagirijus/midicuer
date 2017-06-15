@@ -864,8 +864,6 @@ class MIDICueList(object):
 
                     midi.addTempo(0, float(start_beat + beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
-                    with open('DEBUG.txt', 'a') as debug:
-                        debug.write('\n' + str(beat))
 
         # add last beat and tempo
         beat = self._cues[len(self._cues) - 1].beat

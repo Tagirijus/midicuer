@@ -221,6 +221,27 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.parentApp.setNextForm('Project')
         self.parentApp.switchFormNow()
 
+    def change_tempo(self):
+        """Change tempo for all cues."""
+        really = npyscreen.notify_yes_no(
+            'ATTENTION! This will set ALL cues calculation to "beat" and change '
+            'the tempo for ALL cues !!!',
+            form_color='CRITICAL'
+        )
+
+        if really:
+            try:
+                tempo = int(npyscreen.notify_input(
+                    'New tempo:'
+                ))
+                self.parentApp.tmpCues.change_tempo_for_all(tempo=tempo)
+                self.parentApp.tmpCues.calculate()
+                self.beforeEditing()
+            except:
+                npyscreen.notify_confirm(
+                    'Something went wrong.'
+                )
+
     def export(self):
         """Export to midi file."""
         file = self.choose_file(confirm_if_exists=True)
@@ -246,6 +267,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.m.addItem(text='Save', onSelect=self.save, shortcut='s')
         self.m.addItem(text='Save as...', onSelect=self.save_as, shortcut='S')
         self.m.addItem(text='Load', onSelect=self.load, shortcut='l')
+        self.m.addItem(text='Change tempo', onSelect=self.change_tempo, shortcut='t')
         self.m.addItem(text='Project', onSelect=self.project, shortcut='p')
         self.m.addItem(text='Export', onSelect=self.export, shortcut='^X')
         self.m.addItem(text='Exit', onSelect=self.exit, shortcut='e')

@@ -382,7 +382,6 @@ class MIDICue(object):
         else:
             beat = None
 
-
         # return new object
         return cls(
             first=first,
@@ -874,5 +873,16 @@ class MIDICueList(object):
         # save it to the file
         with open(file, 'wb') as f:
             midi.writeFile(f)
+
+        return True
+
+    def change_tempo_for_all(self, tempo=None):
+        """Change tempo for all cues. Attention: will reset cue.calc to 'beat'."""
+        if type(tempo) is not int:
+            return False
+
+        for cue in self._cues:
+            cue.calc = 'beat'
+            cue.tempo = tempo
 
         return True

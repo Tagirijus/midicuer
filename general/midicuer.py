@@ -203,15 +203,9 @@ class MIDICue(object):
     def tempo(self, value):
         """Set tempo."""
         try:
-            value = float(value)
-            new_tempo = Decimal(
-                '{}.{:.3}'.format(
-                    str(value).split('.', 1)[0],
-                    str(value).split('.', 1)[1]
-                )
-            )
+            new_tempo = Decimal(str(value))
             if new_tempo > 0:
-                self._tempo = new_tempo
+                self._tempo = round(new_tempo, 3)
         except:
             pass
 
@@ -607,9 +601,9 @@ class MIDICueList(object):
         x1 = Decimal(beats)
         y0 = Decimal(60) / Decimal(start_tempo)
         y1 = Decimal(60) / Decimal(end_tempo)
-        x = Decimal(beats) if beat is None else x1
+        x = Decimal(beats) if beat is None else Decimal(beat)
 
-        return Decimal(60) / (y0 + (y1 - y0) * (x / x1))
+        return round(Decimal(60) / (y0 + (y1 - y0) * (x / x1)), 3)
 
     def calc_end_tempo(self, beats, start_tempo, time):
         """
@@ -624,7 +618,7 @@ class MIDICueList(object):
         if x1 == 0:
             return start_tempo
         else:
-            return Decimal(60) / ((2 * t) / x1 - y0)
+            return round(Decimal(60) / ((2 * t) / x1 - y0), 3)
 
     def calc_time(self, beats, start_tempo, end_tempo, beat=None):
         """
@@ -845,8 +839,8 @@ class MIDICueList(object):
                 last_cue = self._cues[i - 1]
 
             # add last ones beat
-            beat = float(last_cue.beat)
-            midi.addNote(0, 1, 60, beat, 1, 100)
+            beat = last_cue.beat
+            midi.addNote(0, 1, 60, float(beat), 1, 100)
 
             # either add simple tempo and continue
             if last_cue.hold_tempo:

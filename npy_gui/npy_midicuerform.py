@@ -247,7 +247,7 @@ class MIDICueForm(npyscreen.FormBaseNewWithMenus):
         self.m.addItem(text='Save as...', onSelect=self.save_as, shortcut='S')
         self.m.addItem(text='Load', onSelect=self.load, shortcut='l')
         self.m.addItem(text='Project', onSelect=self.project, shortcut='p')
-        self.m.addItem(text='Export', onSelect=self.export, shortcut='E')
+        self.m.addItem(text='Export', onSelect=self.export, shortcut='^X')
         self.m.addItem(text='Exit', onSelect=self.exit, shortcut='e')
 
         # create the box with the project list and update the list

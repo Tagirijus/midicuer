@@ -312,7 +312,7 @@ class MIDICue(object):
         out['comment'] = self.comment
         out['framerate'] = self.timecode.framerate
         out['timecode'] = self.timecode.tc_to_ms()
-        out['tempo'] = self.tempo
+        out['tempo'] = str(self.tempo)
         out['hold_tempo'] = self.hold_tempo
         out['beat'] = str(self.beat)
 
@@ -864,6 +864,8 @@ class MIDICueList(object):
 
                     midi.addTempo(0, float(start_beat + beat), tempo)
                     beat += Decimal(str(convert_beat(self.resolution)))
+                    with open('DEBUG.txt', 'a') as debug:
+                        debug.write('\n' + str(Decimal(str(convert_beat(self.resolution)))))
 
         # add last beat and tempo
         beat = self._cues[len(self._cues) - 1].beat

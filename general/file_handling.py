@@ -9,6 +9,7 @@ class FileObject(object):
     def __init__(self, file=None):
         """Initialize the class."""
         self.file = file
+        self.validate_file()
 
     def validate_file(self):
         """Check if file is valid."""
@@ -69,8 +70,8 @@ class FileObject(object):
 
     def save(self, string=None):
         """Save the string to the file."""
-        # cancel if filename is not valid
-        if not self.valid:
+        # cancel if filename is not valid and not new_file
+        if not self.valid and not self.new_file:
             return False
 
         # save the string
@@ -81,9 +82,12 @@ class FileObject(object):
 
     def load(self):
         """Load a string from file and return it."""
-        # cancel if filename is not valid
+        # cancel if filename is not valid or new file (should not exist)
         if not self.valid:
             return False
+
+        if self.new_file:
+            return True
 
         # load the string
         with open(self.file, 'r') as f:

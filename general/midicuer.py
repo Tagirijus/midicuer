@@ -69,7 +69,8 @@ class MIDICue(object):
         timecode='0',
         tempo=120,
         hold_tempo=False,
-        beat=0
+        beat=0,
+        calc=None
     ):
         """Initialize the class."""
         self.cuelist = cuelist
@@ -91,7 +92,7 @@ class MIDICue(object):
         self.beat = beat
 
         # what to calculate? 'beat' or 'tempo' ?
-        self.calc = 'beat'
+        self.calc = 'beat' if calc is None else str(calc)
 
     def __repr__(self):
         """Represent yourself."""
@@ -315,6 +316,7 @@ class MIDICue(object):
         out['tempo'] = self.tempo
         out['hold_tempo'] = self.hold_tempo
         out['beat'] = str(self.beat)
+        out['calc'] = self.calc
 
         return out
 
@@ -382,6 +384,11 @@ class MIDICue(object):
         else:
             beat = None
 
+        if 'calc' in js.keys():
+            calc = js['calc']
+        else:
+            calc = None
+
         # return new object
         return cls(
             first=first,
@@ -391,7 +398,8 @@ class MIDICue(object):
             timecode=timecode,
             tempo=tempo,
             hold_tempo=hold_tempo,
-            beat=beat
+            beat=beat,
+            calc=calc
         )
 
 

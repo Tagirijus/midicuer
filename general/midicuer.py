@@ -137,19 +137,9 @@ class MIDICue(object):
         """Set comment."""
         self._comment = str(value)
 
-    @property
-    def timecode(self):
-        """Get the timecode."""
-        return self._timecode
-
-    @timecode.setter
-    def timecode(self, value):
-        """Set the timecode."""
-        # do not change the first cue point
-        if self.first:
-            return False
-
-        v = str(value)
+    def str_to_correct_tc_str(self, text='0'):
+        """Convert a string like '0:345' to correct timecode '00:00:00:345'."""
+        v = str(text)
         v = v.replace(';', ':').replace('.', ':').split(':')
 
         # only one number given (frames or milliseconds)
@@ -165,15 +155,76 @@ class MIDICue(object):
             tc = '0:{}:{}:{}'.format(v[0], v[1], v[2])
 
         # four numbers given (hours, minutes, seconds and frames / milliseconds)
-        elif len(v) == 4:
+        elif len(v) > 3:
             tc = '{}:{}:{}:{}'.format(v[0], v[1], v[2], v[3])
 
-        # too much given, cancel
+        return tc
+
+    def tc_period_difference(self, tc_str=None):
+        """
+        Calculate timecode difference from string.
+
+        For example this string is given:
+            '1:000 - 0:600'
+        This method returns a new timecode object with this timecode:
+            '00:00:00:400'
+
+        In addition this method only substracts lower tc from higher. So
+        ne could also give this string:
+            '0:600 - 1:000'
+        and get this timecode:
+            '00:00:00:400'
+
+        It's ok, since negative timecodes are not logical in this programm and
+        it's also good for lazy people like me. (:
+        """
+        # fallback return, if given parameter is not a string
+        if type(tc_str) is not str:
+            return tc_str
+
+        # return tc from string without difference calculation, since there is no minus
+        if not '-' in tc_str:
+            return self.str_to_correct_tc(tc_str)
+
+        # calculate difference
+        splitted = tc_str.split('-', 1)
+
+        a = splitted[0].strip()
+        b = splitted[1].strip()
+
+        tc_a = Timecode(
+            self._framerate,
+            self.str_to_correct_tc_str(a)
+        )
+        tc_b = Timecode(
+            self._framerate,
+            self.str_to_correct_tc_str(b)
+        )
+
+        # substract lower from higher
+        if tc_a.frames > tc_b.frames:
+            tc_c = tc_a
+            tc_c.frames -= tc_b.frames - 1
         else:
+            tc_c = tc_b
+            tc_c.frames -= tc_a.frames - 1
+
+        return tc_c
+
+    @property
+    def timecode(self):
+        """Get the timecode."""
+        return self._timecode
+
+    @timecode.setter
+    def timecode(self, value):
+        """Set the timecode."""
+        # do not change the first cue point
+        if self.first:
             return False
 
         # convert the timecode
-        add_me = Timecode(self._framerate, tc)
+        add_me = self.tc_period_difference(value)
 
         # cuelist already set - check for doubled entries and shit
         if self.cuelist is not None:

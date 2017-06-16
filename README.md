@@ -20,13 +20,13 @@ The frontend is made with my tweaked version of [npyscreen](https://github.com/T
 
 When you started the programm, these keyboard shortcuts will help you:
 
-Ctrl+X:		Opens the menu.
-INSERT:		Insert a cue point.
-DELETE:		Delete the selected cue point (except the first).
-ENTER:		Edit the selected cue point in detail.
-t:			Increase the tempo of the selected cue point by 1.
-T:			Decrease the tempo of the selected cue point by 1.
-b:			Increase the beat of the selected cue point by the resolution.
-B:			Decrease the beat of the selected cue point by the resolution.
+	- Ctrl+X: Opens the menu.
+	- INSERT: Insert a cue point.
+	- DELETE: Delete the selected cue point (except the first).
+	- ENTER: Edit the selected cue point in detail.
+	- t: Increase the tempo of the selected cue point by 1.
+	- T: Decrease the tempo of the selected cue point by 1.
+	- b: Increase the beat of the selected cue point by the resolution.
+	- B: Decrease the beat of the selected cue point by the resolution.
 
 Everything else should be self-explaining. If not, mail me and I probably will answer quite fast.

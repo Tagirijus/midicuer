@@ -178,12 +178,8 @@ class MIDICue(object):
         It's ok, since negative timecodes are not logical in this programm and
         it's also good for lazy people like me. (:
         """
-        # fallback return, if given parameter is not a string
-        if type(tc_str) is not str:
-            return tc_str
-
         # return tc from string without difference calculation, since there is no minus
-        if not '-' in tc_str:
+        if not '-' in str(tc_str):
             return Timecode(
                 self._framerate,
                 self.str_to_correct_tc_str(tc_str)

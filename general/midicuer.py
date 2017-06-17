@@ -184,7 +184,10 @@ class MIDICue(object):
 
         # return tc from string without difference calculation, since there is no minus
         if not '-' in tc_str:
-            return self.str_to_correct_tc(tc_str)
+            return Timecode(
+                self._framerate,
+                self.str_to_correct_tc_str(tc_str)
+            )
 
         # calculate difference
         splitted = tc_str.split('-', 1)
